@@ -1,0 +1,8 @@
+/.mpidebug/*
+/.debug/*
+/.mpirelease/*
+/.release/*
+/bin/*
+*.out
+/.vscode/*
+.DS_Store
