@@ -708,6 +708,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
         }
     }
 
+    cout << "openmp" << endl;
     /*==============HELENE=================*/
     newMesh->local2GlobalNodes_ = new int*[nPart];
     newMesh->global2LocalNodes_ = new std::vector<int>[nNodes_[0]];
