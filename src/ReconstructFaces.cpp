@@ -86,8 +86,8 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 	std::vector<int> node_2_cells_connectivity;
 	std::vector<int> cell_2_nodes_connectivity;
 	std::vector<std::vector<int>> all_face_2_nodes_connectivity;
-	int first_block_id;
-	int second_block_id;
+	int first_block_id(0);
+	int second_block_id(0);
 
 	for(int conn = 0; conn < n_connexions; conn++)
 	{
@@ -113,7 +113,7 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 					n_nodes_in_cell = cell_2_nodes_connectivity.size();
 					all_face_2_nodes_connectivity = CreateFaces(cell_2_nodes_connectivity);
 
-					for(int k = 0; k<all_face_2_nodes_connectivity.size();k++)
+					for(size_t k = 0; k<all_face_2_nodes_connectivity.size();k++)
 					{
 						std::vector<int> face_2_nodes_connectivity = all_face_2_nodes_connectivity [k];
 
@@ -214,10 +214,10 @@ std::vector<std::vector<int>> ReconstructFaces::CreateFaces(std::vector<int> cel
 		face_2_nodes_connectivity_local = {{0,3,2,1},{0,1,4},{1,2,4},{2,3,4},{3,0,4}};
 	}
 
-	for(int i=0;i<face_2_nodes_connectivity_local.size();i++)
+	for(size_t i=0;i<face_2_nodes_connectivity_local.size();i++)
 	{
 		std::vector<int> face_2_nodes_connectivity_temp;
-		for(int j=0;j<face_2_nodes_connectivity_local[i].size();j++)
+		for(size_t j = 0; j < face_2_nodes_connectivity_local[i].size(); j++)
 		{
 			int index_2_push_back = face_2_nodes_connectivity_local[i][j];
 
