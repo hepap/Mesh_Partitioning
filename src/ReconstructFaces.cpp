@@ -85,62 +85,146 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 	std::vector<int> common_nodes_vector;
 	std::vector<int> node_2_cells_connectivity;
 	std::vector<int> cell_2_nodes_connectivity;
-
-
-
-	int block_id;
+	std::vector<std::vector<int>> all_face_2_nodes_connectivity;
+	int first_block_id;
+	int second_block_id;
 
 	for(int conn = 0; conn < n_connexions; conn++)
 	{
+		first_block_id = connexionVector_[conn][0];
+		second_block_id = connexionVector_[conn][1];
+
 		common_nodes_vector = commonNodesVector_[conn];
 		n_common_nodes = common_nodes_vector.size();
 
-		for(int blockI; blockI<2;blockI++)
+		for(int i = 0; i<n_common_nodes;i++)
 		{
-			block_id = connexionVector_[conn][blockI];
-			for(int i=0; i<n_common_nodes; i++)
+			node_id = common_nodes_vector[i];
+			node_2_cells_connectivity = global_nodes_vector[0][node_id];
+			n_cells_in_node = node_2_cells_connectivity.size();
+
+			for(int j = 0; j<n_cells_in_node;j++)
 			{
-				node_id = common_nodes_vector[i];
-				node_2_cells_connectivity = global_nodes_vector[0][node_id];
+				cell_id = node_2_cells_connectivity[j];
 
-				n_cells_in_node = node_2_cells_connectivity.size();
-
-				for(int j=0; j<n_cells_in_node; j++)
+				if(cell_flag_4_face_reconstruction_[cell_id]==0)
 				{
-					cell_id = node_2_cells_connectivity[j];
-
 					cell_2_nodes_connectivity = global_cells_vector[0][cell_id];
-
 					n_nodes_in_cell = cell_2_nodes_connectivity.size();
+					all_face_2_nodes_connectivity = CreateFaces(cell_2_nodes_connectivity);
 
-					if(cell_flag_4_face_reconstruction_[cell_id]==0)
+					for(int k = 0; k<all_face_2_nodes_connectivity.size();k++)
 					{
-						std::vector<int>::iterator it;
-						std::vector<int> face_2_nodes_connectivity(4);
+						std::vector<int> face_2_nodes_connectivity = all_face_2_nodes_connectivity [k];
 
-						std::sort(cell_2_nodes_connectivity.begin(), cell_2_nodes_connectivity.end());
+							std::vector<int>::iterator it;
+							std::vector<int> face_in_boundary(n_nodes_in_cell+n_common_nodes);
+							std::sort(face_2_nodes_connectivity.begin(), face_2_nodes_connectivity.end());
+							std::sort(common_nodes_vector.begin(),common_nodes_vector.end());
 
-						it = std::set_intersection( common_nodes_vector.begin(), common_nodes_vector.end(), cell_2_nodes_connectivity.begin(), cell_2_nodes_connectivity.begin(), face_2_nodes_connectivity.begin() );
+							it = std::set_intersection( common_nodes_vector.begin(), common_nodes_vector.end(), face_2_nodes_connectivity.begin(), face_2_nodes_connectivity.end(), face_in_boundary.begin() );
+							face_in_boundary.resize(it - face_in_boundary.begin());
 
-						if(!face_2_nodes_connectivity.empty())
-						{
-							face_2_nodes_connectivity.resize(it - face_2_nodes_connectivity.begin());
-							commonFacesVector_.push_back(face_2_nodes_connectivity);
-							cell_flag_4_face_reconstruction_[cell_id] = 1;
+							// for(int l=0;l<face_in_boundary.size();l++)
+							// {
+							// 	std::cout << face_in_boundary[l] << '\t';
+							// }
+							// std::cout << '\n';
 
-
-						}
+							if(face_in_boundary.size()>=3)
+							{
+								commonFacesVector_.push_back(all_face_2_nodes_connectivity [k]);
+							}
 					}
 				}
+				cell_flag_4_face_reconstruction_[cell_id] = 1;
 			}
-
 		}
-
 	}
 
 
+	// for(int conn = 0; conn < n_connexions; conn++)
+	// {
+	// 	common_nodes_vector = commonNodesVector_[conn];
+	// 	n_common_nodes = common_nodes_vector.size();
+	//
+	// 	for(int blockI; blockI<2;blockI++)
+	// 	{
+	// 		block_id = connexionVector_[conn][blockI];
+	// 		for(int i=0; i<n_common_nodes; i++)
+	// 		{
+	// 			node_id = common_nodes_vector[i];
+	// 			node_2_cells_connectivity = global_nodes_vector[0][node_id];
+	//
+	// 			n_cells_in_node = node_2_cells_connectivity.size();
+	//
+	// 			for(int j=0; j<n_cells_in_node; j++)
+	// 			{
+	// 				cell_id = node_2_cells_connectivity[j];
+	//
+	// 				cell_2_nodes_connectivity = global_cells_vector[0][cell_id];
+	//
+	// 				n_nodes_in_cell = cell_2_nodes_connectivity.size();
+	//
+	// 				if(cell_flag_4_face_reconstruction_[cell_id]==0)
+	// 				{
+	// 					std::vector<int>::iterator it;
+	// 					std::vector<int> face_2_nodes_connectivity(4);
+	//
+	// 					std::sort(cell_2_nodes_connectivity.begin(), cell_2_nodes_connectivity.end());
+	//
+	// 					it = std::set_intersection( common_nodes_vector.begin(), common_nodes_vector.end(), cell_2_nodes_connectivity.begin(), cell_2_nodes_connectivity.begin(), face_2_nodes_connectivity.begin() );
+	//
+	// 					if(!face_2_nodes_connectivity.empty())
+	// 					{
+	// 						face_2_nodes_connectivity.resize(it - face_2_nodes_connectivity.begin());
+	// 						commonFacesVector_.push_back(face_2_nodes_connectivity);
+	// 						cell_flag_4_face_reconstruction_[cell_id] = 1;
+	//
+	//
+	// 					}
+	// 				}
+	// 			}
+	// 		}
+	//
+	// 	}
 
+	// }
+}
 
+std::vector<std::vector<int>> ReconstructFaces::CreateFaces(std::vector<int> cell2NodesConnectivity)
+{
+	int numberOfNodes = cell2NodesConnectivity.size();
+	std::vector<std::vector<int>> face_2_nodes_connectivity_local;
+	std::vector<std::vector<int>> face_2_nodes_connectivity;
 
+	// Tetrahedral
+	if (numberOfNodes == 4)
+	{
+		face_2_nodes_connectivity_local = {{0,2,1},{0,1,3},{1,2,3},{2,0,3}};
+	}
+	// Hexahedral
+	else if (numberOfNodes == 8)
+	{
+		face_2_nodes_connectivity_local = {{1,0,3,2},{1,2,6,5},{2,3,7,6},{3,0,4,7},{0,1,5,4},{4,5,6,7}};
+	}
+	// Pyramid
+	else if (numberOfNodes == 5)
+	{
+		face_2_nodes_connectivity_local = {{0,3,2,1},{0,1,4},{1,2,4},{2,3,4},{3,0,4}};
+	}
 
+	for(int i=0;i<face_2_nodes_connectivity_local.size();i++)
+	{
+		std::vector<int> face_2_nodes_connectivity_temp;
+		for(int j=0;j<face_2_nodes_connectivity_local[i].size();j++)
+		{
+			int index_2_push_back = face_2_nodes_connectivity_local[i][j];
+
+			face_2_nodes_connectivity_temp.push_back(cell2NodesConnectivity[index_2_push_back]);
+		}
+		face_2_nodes_connectivity.push_back(face_2_nodes_connectivity_temp);
+	}
+
+	return face_2_nodes_connectivity;
 }

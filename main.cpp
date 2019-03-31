@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 	cout << "========================STARTING PROGRAM========================" << endl;
 
 	cout << R"(
-		*        (       )   (            (          (          (       )     ) (       )
+*        (       )   (            (          (          (       )     ) (       )
   (  `       )\ ) ( /(   )\ )   (     )\ )  *   ))\ )  *   ))\ ) ( /(  ( /( )\ ) ( /( (
   )\))(  (  (()/( )\()) (()/(   )\   (()/(` )  /(()/(` )  /(()/( )\()) )\()|()/( )\()))\ )
  ((_)()\ )\  /(_)|(_)\   /(_)|(((_)(  /(_))( )(_))(_))( )(_))(_)|(_)\ ((_)\ /(_)|(_)\(()/(
@@ -72,7 +72,7 @@ MetisMesh reader;
 reader.ReadSingleBlockMesh(meshFile);
 
 int n_blocks =nPart;
-int* global_n_elements = reader.getNNodes_();
+int* global_n_elements = reader.getNElements_();
 
 
 MetisMesh* newMesh = reader.Partition(nPart);
@@ -98,33 +98,34 @@ for(int k=0; k<n_blocks; k++)
 
 
 
-std::vector<std::vector<int>> connexionVector = reconstruct_faces.connexionVector_;
-cout<<connexionVector.size()<<endl;
-for(int i= 0;i<connexionVector.size();i++)
-{
-	for(int j=0;j<connexionVector[i].size();j++)
-	{
-		cout<<connexionVector[i][j]<<"\t";
-	}
-	cout<<"\n";
-}
+// std::vector<std::vector<int>> connexionVector = reconstruct_faces.connexionVector_;
+// cout<<connexionVector.size()<<endl;
+// for(int i= 0;i<connexionVector.size();i++)
+// {
+// 	for(int j=0;j<connexionVector[i].size();j++)
+// 	{
+// 		cout<<connexionVector[i][j]<<"\t";
+// 	}
+// 	cout<<"\n";
+// }
 
 std::vector<int>** globalCell2GlobalNodes = reader.getConnectivity_();
 std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
 
-
 reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
+cout<<"out of my face hehe"<<endl;
 std::vector<std::vector<int>> face2nodes = reconstruct_faces.commonFacesVector_;
+cout<<"Is this happening?!"<<endl;
 cout<<face2nodes.size()<<endl;
-for(int i= 0;i<face2nodes.size();i++)
-{
-	for(int j=0;j<face2nodes[i].size();j++)
-	{
-		cout<<face2nodes[i][j]<<"\t";
-	}
-	cout<<"\n";
-}
+// for(int i= 0;i<face2nodes.size();i++)
+// {
+// 	for(int j=0;j<face2nodes[i].size();j++)
+// 	{
+// 		cout<<face2nodes[i][j]<<"\t";
+// 	}
+// 	cout<<"\n";
+// }
 
 newMesh->WriteMesh(outputMeshFile);
 }

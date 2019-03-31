@@ -14,6 +14,10 @@ int* MetisMesh::getNNodes_()
 {
   return nNodes_;
 }
+int* MetisMesh::getNElements_()
+{
+  return nElements_;
+}
 int** MetisMesh::getLocal2GlobalNodes_()
 {
   return local2GlobalNodes_;
@@ -724,12 +728,12 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     /*==============HELENE=================*/
     newMesh->local2GlobalNodes_ = new int*[nPart];
-    newMesh->global2LocalNodes_ = new int*[nNodes_[0]];
+    newMesh->global2LocalNodes_ = new std::vector<int>[nNodes_[0]];
 
-    for (int i = 0; i < nNodes_[0]; i++)
-    {
-        newMesh->global2LocalNodes_[i] = new int[2];
-    }
+    // for (int i = 0; i < nNodes_[0]; i++)
+    // {
+    //     newMesh->global2LocalNodes_[i] = new std::vector<int>;
+    // }
     /*=====================================*/
 
     #pragma omp parallel for num_threads(4)
@@ -749,8 +753,8 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
             /*==============HELENE=================*/
             newMesh->local2GlobalNodes_[blockI][i] = nodeId;
-            newMesh->global2LocalNodes_[nodeId][0] = i;
-            newMesh->global2LocalNodes_[nodeId][1] = blockI;
+            newMesh->global2LocalNodes_[nodeId].push_back(i);
+            newMesh->global2LocalNodes_[nodeId].push_back(blockI);
             /*=====================================*/
         }
     }

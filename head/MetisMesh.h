@@ -19,7 +19,7 @@ private:
 
     /*==============HELENE=================*/
     int** local2GlobalNodes_;
-    int** global2LocalNodes_;
+    std::vector<int>* global2LocalNodes_;
     std::vector<int>** node2Cells_;
     std::vector<int>** cell2GlobalNodes_;
     /*=====================================*/
@@ -54,6 +54,7 @@ public:
     void SetConnectivity(std::vector<int>** connectivity_);
     int NumberOfNodes(int elementType);
     int* getNNodes_();
+    int* getNElements_();
     int** getLocal2GlobalNodes_();
     int** getGlobal2LocalNodes_();
     std::vector<int>** getConnectivity_();
