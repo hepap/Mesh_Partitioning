@@ -11,7 +11,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	cout << "========================STARTING PROGRAM========================" << endl;
-
+/* 
 	cout << R"(
 *        (       )   (            (          (          (       )     ) (       )
   (  `       )\ ) ( /(   )\ )   (     )\ )  *   ))\ )  *   ))\ ) ( /(  ( /( )\ ) ( /( (
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
  |_|  |_|___|___/|_||_| |_|   /_/ \_\|_|_\  |_| |___|  |_| |___| \___/|_|\_|___||_|\_|  \___|
 
 	)" << endl;
-
+ */
 
 
 
@@ -54,7 +54,7 @@ FindElementsInConnexion(std::vector<int> common_nodes_vector, std::vector<int>**
 reconstruct_faces.~ReconstructFaces();
 =============================TEST HELENE=============================*/
 
-if (argc != 4)
+if (argc != 5)
 {
 	std::cout << "Usage: ./metis <single block mesh file> <Number of partitions> <Output mesh file name>\n";
 	return 0;
@@ -66,7 +66,7 @@ if (argc != 4)
 std::string meshFile = argv[1];
 int nPart = atoi(argv[2]);
 std::string outputMeshFile = argv[3];
-
+std::string outputTopology = argv[4];
 
 MetisMesh reader;
 reader.ReadSingleBlockMesh(meshFile);
