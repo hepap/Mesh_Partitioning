@@ -70,7 +70,7 @@ std::string outputTopology = argv[4];
 
 MetisMesh reader;
 reader.ReadSingleBlockMesh(meshFile);
-
+cout << "reading done" << endl;
 int n_blocks =nPart;
 int* global_n_elements = reader.getNElements_();
 
@@ -128,4 +128,6 @@ cout<<face2nodes.size()<<endl;
 // }
 
 newMesh->WriteMesh(outputMeshFile);
+
+//newMesh->WriteTopology(outputTopology);
 }

@@ -1,0 +1,9 @@
+NBLOCK= 2
+cubetest1.su2
+cubetest2.su2
+Block= 1
+NDIME= 3
+NELEM= 13
+Block= 2
+NDIME= 3
+NELEM= 14

@@ -45,6 +45,7 @@ public:
     friend class MetisBoundary;
     static int nDimensions_;
     vector<vector<int>>* ReturnFaces(int blockI, int element);
+    
 
 public:
     void Init(int nBlock, int* nElements, int* nNodes);
@@ -59,7 +60,7 @@ public:
     int** getGlobal2LocalNodes_();
     std::vector<int>** getConnectivity_();
     std::vector<int>**  getNode2Cells_();
-
+    std::vector<std::string> filesName_;
     // Fonction WriteTopology
     void WriteTopology(std::string filename);
 };
