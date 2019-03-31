@@ -83,16 +83,9 @@ MetisMesh::~MetisMesh()
         if (z_[blockI] != nullptr)
             delete[] z_[blockI];
 
-        // delete local2GlobalElements_;
+
         if (local2GlobalElements_[blockI] != nullptr)
             delete[] local2GlobalElements_[blockI];
-         /* if (elementType_[blockI] != nullptr)
-            delete[] elementType_[blockI];
-        if (elementNbrNodes_[blockI] != nullptr)
-            delete[] elementNbrNodes_[blockI]; */
-
-
-
         if (connectivity_[blockI] != nullptr)
             delete[] connectivity_[blockI];
 
@@ -246,7 +239,7 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
         {
             getline(myfile, line);
         }
-        cout << line << endl;
+        
         // Stocke le nombre de noeuds du maillage
         sscanf(line.c_str(), "NPOIN=%d", &nNodes);
         std::cout << "Nombre de noeuds= " << nNodes << endl;
@@ -373,14 +366,12 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
                 {
 
                     myfile >> node;
-                    //getline(myfile, line);
                     metisBoundary_->boundaryConnectivity_[i][j].push_back(node);
                 }
 
                 getline(myfile, line);
             }
 
-           // cout << "last " << metisBoundary_->boundaryConnectivity_[6][1833][2] << endl;
             if (i != nBoundaries - 1)
             {
                 getline(myfile, line);
@@ -392,7 +383,6 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
 
 
         // getline and tokenize node in boundaries
-        myfile.seekg(0, myfile.beg);
         myfile.seekg(0, myfile.beg);
         //debut du fichier remplacer par une recher mot cle ^
         getline(myfile, line);
@@ -463,14 +453,6 @@ void MetisMesh::WriteMesh(std::string fileName)
         fprintf(fid, "Block= %d\n", blockI + 1);
         fprintf(fid, "NDIME= %d\n", nDimensions_);
         fprintf(fid, "NELEM= %d\n", nElements);
-
-
-        //cout << "local2GlobalElements_[0][0]" <<  local2GlobalElements_[blockI][0] << endl;
-        //cout << "elementNbrNodes_[0][elementI] " << elementNbrNodes_[0][local2GlobalElements_[blockI][nElements]] << endl;
-        //for (int i = 0; i < 4)
-        //cout <<
-        //cout << blockI << " NELEM= " << nElements << endl;
-
 
         for (int elementI = 0; elementI < nElements; elementI++)
         {
