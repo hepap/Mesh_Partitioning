@@ -36,6 +36,15 @@ std::vector<int>** MetisMesh::getNode2Cells_()
 
 /*=====================================*/
 
+
+/*==============Isabelle=================*/
+MetisBoundary* MetisMesh::GetMetisBoundary_()
+{
+  return metisBoundary_;
+}
+/*=======================================*/
+
+
 int findNodeIndex(std::vector<int> &list, int node2find)
 {
     int count(list.size());
@@ -408,6 +417,16 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
         myfile.close();
         std::cout << "closing... " << fileName << endl;
 
+        for (int i = 0; i < 30; i++) {
+            cout << i << " = ";
+            for (int j = 0; j < node2Cells_[0][i].size();  j++) {
+
+                cout << node2Cells_[0][i][j] << " ";
+                
+            }
+            cout << endl;
+        }
+
     }
     else
         std::cout << "could not open " << fileName << endl;
@@ -665,7 +684,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
     std::cout << "new connectivity done" << endl;
     int newNnodes[nPart];
     /*==============HELENE=================*/
-    int nodeCount4Global2LocalNodes = 0.;
+    int nodeCount4Global2LocalNodes = 0;
     /*=====================================*/
     #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
@@ -760,7 +779,8 @@ MetisMesh* MetisMesh::Partition(int nPart)
     local2GlobalElements_ = newMesh->local2GlobalElements_;
     newMesh->elementNbrNodes_ = elementNbrNodes_;
     std::cout << "will it happend" << endl;
-    newMesh->ComputePhysicalBoundaries(metisBoundary_);
+
+
     return newMesh;
 
 }
@@ -897,25 +917,43 @@ void MetisMesh::SetConnectivity(std::vector<int> **connectivity)
 
 
 
-void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary) 
+void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells) 
 {
-
+    //std::vector<int>** globalNode2GlobalCells = getNode2Cells_();
     cout << "ALLLLOOO " << endl;
     std::vector<int> **newBoundaryConnectivity;
     newBoundaryConnectivity = new std::vector<int> *[nBlock_];
 
+     for (int i = 0; i < 30; i++) {
+            cout << i << " = ";
+            for (int j = 0; j < globalNode2globalCells[0][i].size();  j++) {
+
+                cout << globalNode2globalCells[0][i][j] << " ";
+                
+            }
+            cout << endl;
+        }
+
+
     for (int boundaryI = 0; boundaryI < metisBoundary->nBoundaries_; boundaryI++) {
     std::cout << "------ " << boundaryI << " ------" << endl;
 
-        
+        // accede a chacun des elements faces de la frontiere
         for (int i = 0; i < metisBoundary->boundaryNelements_[boundaryI]; i++) {
 
             std::cout << "frontiere " << i << endl;
+
+            // accede aux noeuds formant la face a la frontiere
             for (int j = 0; j < metisBoundary->boundaryElementNbrNodes_[boundaryI][i]; j++)
             {
                 
-                
+                // un seul noeud de lelement face
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][j];
+
+              /*   for (int k = 0; k < node2Cells_[0][j].size(); k++) {
+                    cout << node2Cells_[0][j][k] << " ";
+                }
+                cout << endl; */
                //cout << "globalNode " << globalNode << endl;
 
           

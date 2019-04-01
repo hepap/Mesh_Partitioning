@@ -24,7 +24,7 @@ class MetisBoundary
     //MetisBoundary(int nElements, int* elementType, int* elementNbrNodes, int **boundaryElements);
     ~MetisBoundary();
     void InitBoundary(int* nElements, int nBoundaries);
-
+  
     // ====== Isabelle ----
     // Compute les frontiere physique et prend en entree un pointeur vers un objet MetisBoundary
     //void ComputePhysicalBoundaries(MetisBoundary* metisBoundary);

@@ -48,6 +48,7 @@ public:
     
 
 public:
+    MetisBoundary* GetMetisBoundary_();
     void Init(int nBlock, int* nElements, int* nNodes);
     void ReadSingleBlockMesh(std::string fileName);
     void WriteMesh(std::string fileName);
@@ -63,7 +64,7 @@ public:
     std::vector<std::string> filesName_;
     // Fonction WriteTopology
     void WriteTopology(std::string filename);
-    void ComputePhysicalBoundaries(MetisBoundary* metisBoundary);
+    void ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells);
     void WriteOutputTecplot(std::string fileName);
 
 };

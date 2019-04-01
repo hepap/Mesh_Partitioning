@@ -112,6 +112,7 @@ for(int k=0; k<n_blocks; k++)
 std::vector<int>** globalCell2GlobalNodes = reader.getConnectivity_();
 std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
 
+
 reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
 cout<<"out of my face hehe"<<endl;
@@ -137,8 +138,11 @@ for(int i = 0; i<reconstruct_faces.connexionVector_.size();i++)
 }
 
 // ===== Isabelle =====
-cout << "ComputeBoundaries " << endl;
 
+MetisBoundary* metisBoundary = reader.GetMetisBoundary_();
+
+cout << "ComputeBoundaries " << endl;
+newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells);
 // ====================
 
 newMesh->WriteMesh(outputMeshFile);
