@@ -45,7 +45,7 @@ int findNodeIndex(std::vector<int> &list, int node2find)
     {
         if (node2find == list[i])
         {
-            return i + 1;
+            return i+1;
         }
     }
 
@@ -651,7 +651,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     cout << "nPart = " << nPart << endl;
 
-    #pragma omp parallel for num_threads(4)
+    // #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
         newConnectivity[blockI] = new std::vector<int>[newNelements[blockI]];
@@ -672,7 +672,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
                 int elementIblockI = elementsPerBlock[blockI][i];
                 int n1 = connectivity_[0][elementIblockI][j];
                 int newN1 = findNodeIndex(addedNode[blockI], n1);
-                newConnectivity[blockI][i][j] = newN1;
+                newConnectivity[blockI][i][j] = newN1-1;
             }
         }
 
@@ -924,7 +924,6 @@ Mesh* Mesh::Partition(int nPart)
 void MetisMesh::SetConnectivity(std::vector<int> **connectivity)
 {
     std::cout << "set connectivity function called" << endl;
-    #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nBlock_; blockI++)
         for (int elementI = 0; elementI < nElements_[blockI]; elementI++)
             connectivity_[blockI][elementI] = connectivity[blockI][elementI];
@@ -951,4 +950,74 @@ vector<vector<int>>* MetisMesh::ReturnFaces(int blockI, int element)
 
 
     }
+}
+
+void MetisMesh::WriteOutputTecplot(std::string fileName)
+{
+    // FILE *fid = fopen(fileName.c_str(), "w");
+    std::ofstream fid;
+    fid.open(fileName);
+    std::cout << "file open... " << fileName << endl;
+
+    fid << "TTILE = \"Vizualisation of the partitioned mesh\""<<endl;
+    fid << "VARIABLES=\"X\",\"Y\",\"Z\"" << endl;
+
+
+    for (int blockI = 0; blockI < nBlock_; blockI++)
+    {
+        int nNodes = nNodes_[blockI];
+        int nElements = nElements_[blockI];
+        fid << "ZONE T=\"element"<<blockI <<"\""<< endl;
+        fid << "Nodes=" << nNodes << ", " << "Elements=" << nElements << ", " << "ZONETYPE=FETETRAHEDRON" << endl;
+        fid << "DATAPACKING=BLOCK" << endl;
+        // fid << "VARLOCATION=([4,5,6,7,8,9,10]=CELLCENTERED)" << endl;
+
+        for (int nodeI = 0; nodeI < nNodes; nodeI++)
+        {
+            // fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
+            fid <<  x_[blockI][nodeI] <<endl;
+        }
+        for (int nodeI = 0; nodeI < nNodes; nodeI++)
+        {
+            // fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
+            fid <<  y_[blockI][nodeI] <<endl;
+        }
+        for (int nodeI = 0; nodeI < nNodes; nodeI++)
+        {
+            // fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
+            fid <<  z_[blockI][nodeI] <<endl;
+        }
+
+        //cout << "local2GlobalElements_[0][0]" <<  local2GlobalElements_[blockI][0] << endl;
+        //cout << "elementNbrNodes_[0][elementI] " << elementNbrNodes_[0][local2GlobalElements_[blockI][nElements]] << endl;
+        //for (int i = 0; i < 4)
+        //cout <<
+        //cout << blockI << " NELEM= " << nElements << endl;
+
+
+        for (int elementI = 0; elementI < nElements; elementI++)
+        {
+            int elementGlobal = local2GlobalElements_[blockI][elementI];
+
+            //cout << "element local du block" << blockI << " element" << elementI <<  " = " << elementGlobal << endl;
+            //cout << "elementType_[elementGlobal] " << elementType_[elementGlobal] << endl;
+            //cout << "elementNbrNodes_[elementGlobal] " << elementNbrNodes_[elementGlobal] << endl;
+
+
+           for (int j = 0; j < elementNbrNodes_[elementGlobal]; j++)
+            {
+              fid << connectivity_[blockI][elementI][j]+1<<"\t";
+                // fprintf(fid, "%d ", connectivity_[blockI][elementI][j]);
+            }
+
+            fid<< "\n";
+        }
+
+        cout << "access connectivity elements block " << blockI << endl;
+
+        cout << "access nodes block " << blockI << endl;
+    }
+
+    fid.close();
+    std::cout << fileName << "output file closed ..." << endl;
 }

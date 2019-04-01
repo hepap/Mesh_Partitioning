@@ -14,7 +14,7 @@ public:
 	int* cell_flag_4_face_reconstruction_;
 	std::vector<std::vector<int>> commonNodesVector_;
 	std::vector<std::vector<int>> connexionVector_;
-	std::vector<std::vector<int>> commonFacesVector_;
+	std::vector<std::vector<int>>* commonFacesVector_;
 
 
 	ReconstructFaces(int n_blocks, int global_n_elements);

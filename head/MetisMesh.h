@@ -59,6 +59,8 @@ public:
     int** getGlobal2LocalNodes_();
     std::vector<int>** getConnectivity_();
     std::vector<int>**  getNode2Cells_();
+    void WriteOutputTecplot(std::string fileName);
+
 };
 
 #endif

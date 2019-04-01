@@ -115,17 +115,28 @@ std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
 reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
 cout<<"out of my face hehe"<<endl;
-std::vector<std::vector<int>> face2nodes = reconstruct_faces.commonFacesVector_;
+std::vector<std::vector<int>>* face2nodes = reconstruct_faces.commonFacesVector_;
 cout<<"Is this happening?!"<<endl;
-cout<<face2nodes.size()<<endl;
-// for(int i= 0;i<face2nodes.size();i++)
+// cout<<face2nodes[0].size()<<endl;
+// for(int i= 0;i<face2nodes[0].size();i++)
 // {
-// 	for(int j=0;j<face2nodes[i].size();j++)
+// 	for(int j=0;j<face2nodes[0][i].size();j++)
 // 	{
-// 		cout<<face2nodes[i][j]<<"\t";
+// 		cout<<face2nodes[0][i][j]<<"\t";
 // 	}
 // 	cout<<"\n";
 // }
+cout<<reconstruct_faces.connexionVector_.size()<<endl;
+for(int i = 0; i<reconstruct_faces.connexionVector_.size();i++)
+{
+	for(int j = 0; j<reconstruct_faces.connexionVector_[i].size();j++)
+	{
+		cout<<reconstruct_faces.connexionVector_[i][j]<<"\t";
+	}
+	std::cout << '\n';
+}
 
 newMesh->WriteMesh(outputMeshFile);
+newMesh->WriteOutputTecplot("outputMeshFile.dat");
+
 }
