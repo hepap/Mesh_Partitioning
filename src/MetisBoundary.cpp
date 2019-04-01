@@ -4,7 +4,10 @@
 
 MetisBoundary::MetisBoundary(int nBoundaries) 
 : nBoundaries_(nBoundaries), boundaryNames_(new string[nBoundaries]), boundaryConnectivity_(nullptr), boundaryNelements_(new int[nBoundaries]), 
-boundaryElementType_(new int* [nBoundaries]), boundaryElementNbrNodes_(new int* [nBoundaries]) {}
+boundaryElementType_(new int* [nBoundaries]), boundaryElementNbrNodes_(new int* [nBoundaries]) 
+{
+    cout << "constructing MetisBoundary........." << endl;
+}
 
 
 /* MetisBoundary::MetisBoundary(int nElements, int* elementType, int* elementNbrNodes, int **boundaryElements)

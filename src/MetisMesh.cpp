@@ -4,6 +4,7 @@
 #include <fstream>
 #include <metis.h>
 #include <string>
+#include <algorithm> 
 #include "omp.h"
  
 using namespace std;
@@ -42,6 +43,10 @@ MetisBoundary* MetisMesh::GetMetisBoundary_()
 {
   return metisBoundary_;
 }
+/* int* MetisMesh::GetEpart_()
+{
+  return epart_;
+} */
 /*=======================================*/
 
 
@@ -201,7 +206,7 @@ void MetisMesh::Init(int nBlock, int *nElements, int *nNodes)
     // Only want to initialize after partitioning
     if (nBlock != 1) {
         local2GlobalElements_ = new int *[nBlock];
-    
+        
         for (int i = 0; i < nBlock; i++) {
             local2GlobalElements_[i] = new int [nElements[i]];
         }
@@ -417,16 +422,6 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
         myfile.close();
         std::cout << "closing... " << fileName << endl;
 
-        for (int i = 0; i < 30; i++) {
-            cout << i << " = ";
-            for (int j = 0; j < node2Cells_[0][i].size();  j++) {
-
-                cout << node2Cells_[0][i][j] << " ";
-                
-            }
-            cout << endl;
-        }
-
     }
     else
         std::cout << "could not open " << fileName << endl;
@@ -602,7 +597,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     std::vector<int> elementsPerBlock[nPart];
     std::vector<int> elementNbrNodesPerBlock[nPart];
-
+   
 
     for (int i = 0; i < nElements_[0]; i++)
     {
@@ -917,18 +912,23 @@ void MetisMesh::SetConnectivity(std::vector<int> **connectivity)
 
 
 
-void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells) 
+void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2GlobalCells) 
 {
     //std::vector<int>** globalNode2GlobalCells = getNode2Cells_();
     cout << "ALLLLOOO " << endl;
     std::vector<int> **newBoundaryConnectivity;
     newBoundaryConnectivity = new std::vector<int> *[nBlock_];
+    std::vector<int> node1;
+    std::vector<int> node2;
+    int commonGlobalElement;
+    
+
 
      for (int i = 0; i < 30; i++) {
             cout << i << " = ";
-            for (int j = 0; j < globalNode2globalCells[0][i].size();  j++) {
+            for (size_t j = 0; j < globalNode2GlobalCells[0][i].size();  j++) {
 
-                cout << globalNode2globalCells[0][i][j] << " ";
+                cout << globalNode2GlobalCells[0][i][j] << " ";
                 
             }
             cout << endl;
@@ -942,32 +942,36 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
         for (int i = 0; i < metisBoundary->boundaryNelements_[boundaryI]; i++) {
 
             std::cout << "frontiere " << i << endl;
+            int sizeBoundary = metisBoundary->boundaryElementNbrNodes_[boundaryI][i];
+            int firstNode = metisBoundary->boundaryConnectivity_[boundaryI][i][0];
+            node1 = globalNode2GlobalCells[0][firstNode];
+            std::sort(node1.begin(), node1.end());
+            int node1size = node1.size();
 
             // accede aux noeuds formant la face a la frontiere
-            for (int j = 0; j < metisBoundary->boundaryElementNbrNodes_[boundaryI][i]; j++)
+            for (int j = 1; j < sizeBoundary; j++)
             {
                 
                 // un seul noeud de lelement face
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][j];
+                node2 = globalNode2GlobalCells[0][globalNode];
+                std::sort(node2.begin(), node2.end());
+                std::vector<int>::iterator it;
+                std::vector<int> vCommon(node2.size() + node1size);
 
-              /*   for (int k = 0; k < node2Cells_[0][j].size(); k++) {
-                    cout << node2Cells_[0][j][k] << " ";
+                it = std::set_intersection(node1.begin(), node1.end(), node2.begin(), node2.end(), vCommon.begin() );
+				vCommon.resize(it - vCommon.begin());
+
+                if (vCommon.size() == 1) {
+                    commonGlobalElement = vCommon[0];
+                    cout << "Lelement commun pour la face " << i << " est : " << commonGlobalElement << endl;
+                    break;
                 }
-                cout << endl; */
-               //cout << "globalNode " << globalNode << endl;
-
-          
-                int size = global2LocalNodes_[globalNode].size();
-               
-
-               // int nodeIndex = global2LocalNodes_[globalNode][0];
-                //int blockIndex =  global2LocalNodes_[globalNode][1];
-
-             /*    if (size == 2) {
-                    newBoundaryConnectivity[]
-                } */
-                //cout << endl;
-                //cout << metisBoundary->boundaryConnectivity_[i][j][k] << endl;
+                else {
+                    node1 = vCommon; 
+                }
+                cout << vCommon[0] << endl;
+     
             }
             
         }
@@ -1089,3 +1093,26 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
     fid.close();
     std::cout << fileName << "output file closed ..." << endl;
 }
+
+/* std::vector<std::string> intersection(std::vector<std::string> &v1,
+                                      std::vector<std::string> &v2){
+    std::vector<std::string> v3;
+
+    std::sort(v1.begin(), v1.end());
+    std::sort(v2.begin(), v2.end());
+
+    std::set_intersection(v1.begin(),v1.end(),
+                          v2.begin(),v2.end(),
+                          back_inserter(v3));
+    return v3;
+}
+
+int main(){
+    std::vector<std::string> v1 {"a","b","c"};
+    std::vector<std::string> v2 {"b","c"};
+
+    auto v3 = intersection(v1, v2);
+
+    for(std::string n : v3)
+        std::cout << n << ' ';
+} */

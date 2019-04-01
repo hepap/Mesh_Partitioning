@@ -10,6 +10,7 @@ class MetisMesh
 private:
     int* nElements_;
     int* nNodes_;
+    
     /*==============HELENE=================*/
     int* elementNbrNodes_;
     int* elementType_;
@@ -35,6 +36,7 @@ private:
     MetisBoundary* metisBoundary_;
     std::vector<int>** connectivity_;
 
+    
     // std::vector<int>* global2LocalElements_;
     //std::vector<int>** connectivity_boundary;
 
@@ -49,6 +51,7 @@ public:
 
 public:
     MetisBoundary* GetMetisBoundary_();
+    int* GetEpart_();
     void Init(int nBlock, int* nElements, int* nNodes);
     void ReadSingleBlockMesh(std::string fileName);
     void WriteMesh(std::string fileName);
