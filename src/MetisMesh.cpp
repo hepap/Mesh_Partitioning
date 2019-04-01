@@ -376,6 +376,7 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
             }
         }
 
+       
         std::cout << "Frontieres enregistrees " << endl;
 
 
@@ -734,7 +735,6 @@ MetisMesh* MetisMesh::Partition(int nPart)
     }
 
 
-
     std::cout << "addedNode ok" << endl;
 
     for (int blockI = 0; blockI < nPart; blockI++)
@@ -759,7 +759,8 @@ MetisMesh* MetisMesh::Partition(int nPart)
     newMesh->elementType_ = elementType_;
     local2GlobalElements_ = newMesh->local2GlobalElements_;
     newMesh->elementNbrNodes_ = elementNbrNodes_;
-
+    cout << "will it happend" << endl;
+    newMesh->ComputePhysicalBoundaries(metisBoundary_);
     return newMesh;
 
 }
@@ -894,6 +895,50 @@ void MetisMesh::SetConnectivity(std::vector<int> **connectivity)
             connectivity_[blockI][elementI] = connectivity[blockI][elementI];
 }
 
+
+
+
+void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary) 
+{
+
+    cout << "ALLLLOOO " << endl;
+    std::vector<int> **newBoundaryConnectivity;
+    newBoundaryConnectivity = new std::vector<int> *[nBlock_];
+
+    for (int boundaryI = 0; boundaryI < metisBoundary->nBoundaries_; boundaryI++) {
+    cout << "------ " << boundaryI << " ------" << endl;
+
+        
+        for (int i = 0; i < metisBoundary->boundaryNelements_[boundaryI]; i++) {
+
+            cout << "frontiere " << i << endl;
+            for (int j = 0; j < metisBoundary->boundaryElementNbrNodes_[boundaryI][i]; j++)
+            {
+                
+                
+                int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][j];
+               //cout << "globalNode " << globalNode << endl;
+
+          
+                int size = global2LocalNodes_[globalNode].size();
+               
+
+               // int nodeIndex = global2LocalNodes_[globalNode][0];
+                //int blockIndex =  global2LocalNodes_[globalNode][1];
+
+             /*    if (size == 2) {
+                    newBoundaryConnectivity[]
+                } */
+                //cout << endl;
+                //cout << metisBoundary->boundaryConnectivity_[i][j][k] << endl;
+            }
+            
+        }
+
+    }
+}
+
+
 /*
 void MetisMesh::WriteTopology(std::string fileName)
 {
@@ -935,12 +980,4 @@ void MetisMesh::WriteTopology(std::string fileName)
     fclose(fid);
     std::cout << fileName << "output file closed ..." << endl;
 }  */
-
-
-
-
-
-
-
-    
 

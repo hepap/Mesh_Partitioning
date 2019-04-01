@@ -127,7 +127,13 @@ cout<<face2nodes.size()<<endl;
 // 	cout<<"\n";
 // }
 
+// ===== Isabelle =====
+cout << "ComputeBoundaries " << endl;
+
+// ====================
+
 newMesh->WriteMesh(outputMeshFile);
 
+// ===== Isabelle =====
 //newMesh->WriteTopology(outputTopology);
 }

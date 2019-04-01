@@ -63,6 +63,7 @@ public:
     std::vector<std::string> filesName_;
     // Fonction WriteTopology
     void WriteTopology(std::string filename);
+    void ComputePhysicalBoundaries(MetisBoundary* metisBoundary);
 };
 
 #endif

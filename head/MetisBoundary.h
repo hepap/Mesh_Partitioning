@@ -14,8 +14,8 @@ enum BoundaryType {
 class MetisBoundary
 {
 
-  static MetisBoundary ComputeGlobalBoundaries(const string boundaryName, int *nElements, const vector<vector<int>> &globalNodes);
-  static MetisBoundary ComputeConnectBoundaries(const vector<vector<int>> &globalNodes);
+  
+
 
   static BoundaryType FindBoundaryTypeFromTagStr(string tag_str);
 
@@ -25,6 +25,9 @@ class MetisBoundary
     ~MetisBoundary();
     void InitBoundary(int* nElements, int nBoundaries);
 
+    // ====== Isabelle ----
+    // Compute les frontiere physique et prend en entree un pointeur vers un objet MetisBoundary
+    //void ComputePhysicalBoundaries(MetisBoundary* metisBoundary);
     string SetBoundaryName(string boundaryName);
 
     //vector<vector<int>> localNodes;

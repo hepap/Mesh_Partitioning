@@ -32,6 +32,28 @@ void MetisBoundary::InitBoundary(int* nElements, int nBoundaries) {
 
 } 
 
+// Arrive pas a etre callee depuis le main
+/* void MetisBoundary::ComputePhysicalBoundaries(MetisBoundary* metisBoundary) 
+{
+    cout << "ALLLLOOO " << endl;
+
+    for (int i = 0; i < metisBoundary->nBoundaries_; i++) {
+        
+        for (int j = 0; j < metisBoundary->boundaryNelements_[i]; j++) {
+                
+            for (int k = 0; k < metisBoundary->boundaryElementNbrNodes_[i][j]; k++)
+            {
+   
+                cout << boundaryConnectivity_[i][j][k] << endl;
+            }
+        }
+
+
+
+    }
+
+
+} */
 
 /* string MetisBoundary::SetBoundaryName(string boundaryName) {
 
