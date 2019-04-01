@@ -64,6 +64,8 @@ public:
     // Fonction WriteTopology
     void WriteTopology(std::string filename);
     void ComputePhysicalBoundaries(MetisBoundary* metisBoundary);
+    void WriteOutputTecplot(std::string fileName);
+
 };
 
 #endif
