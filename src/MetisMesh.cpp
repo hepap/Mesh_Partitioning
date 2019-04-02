@@ -22,9 +22,9 @@ int** MetisMesh::getLocal2GlobalNodes_()
 {
   return local2GlobalNodes_;
 }
-int** MetisMesh::getGlobal2LocalNodes_()
+std::vector<int>* MetisMesh::getGlobal2LocalNodes_()
 {
-  return local2GlobalNodes_;
+  return global2LocalNodes_;
 }
 std::vector<int>** MetisMesh::getConnectivity_()
 {
@@ -449,6 +449,7 @@ void MetisMesh::WriteMesh(std::string fileName)
         int nNodes = nNodes_[blockI];
         int nElements = nElements_[blockI];
 
+
         fprintf(fid, "Block= %d\n", blockI);
         fprintf(fid, "NDIME= %d\n", nDimensions_);
         fprintf(fid, "NELEM= %d\n", nElements);
@@ -711,6 +712,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
             newMesh->global2LocalElements_[elementsPerBlock[blockI][i]].push_back(i);
             newMesh->global2LocalElements_[elementsPerBlock[blockI][i]].push_back(blockI);
+
         }
     }
 
@@ -1045,7 +1047,14 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
                 int global2local_elem_1=global2LocalElements_[reconstruct_faces->commonCellsVector_[connexion_idx][k][1]][0];
                 int global2local_block_1=global2LocalElements_[reconstruct_faces->commonCellsVector_[connexion_idx][k][1]][1];
                
-                fprintf(fid, "%d %d %d %d\n", global2local_elem_0, global2local_block_0, global2local_elem_1, global2local_block_1);
+                if (global2local_block_0==blockI)
+                {
+                    fprintf(fid, "%d\n", global2local_elem_0);
+                }
+                else 
+                {
+                    fprintf(fid, "%d\n", global2local_elem_1);
+                }
             }
         }
 
@@ -1059,7 +1068,7 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
 
 
 
-void MetisMesh::WriteOutputTecplot(std::string fileName)
+void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
 {
     // FILE *fid = fopen(fileName.c_str(), "w");
     std::ofstream fid;
@@ -1067,7 +1076,7 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
     std::cout << "file open... " << fileName << endl;
 
     fid << "TTILE = \"Vizualisation of the partitioned mesh\""<<endl;
-    fid << "VARIABLES=\"X\",\"Y\",\"Z\"" << endl;
+    fid << "VARIABLES=\"X\",\"Y\",\"Z\",\"FLAG\"" << endl;
 
 
     for (int blockI = 0; blockI < nBlock_; blockI++)
@@ -1077,7 +1086,7 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
         fid << "ZONE T=\"element"<<blockI <<"\""<< endl;
         fid << "Nodes=" << nNodes << ", " << "Elements=" << nElements << ", " << "ZONETYPE=FETETRAHEDRON" << endl;
         fid << "DATAPACKING=BLOCK" << endl;
-        // fid << "VARLOCATION=([4,5,6,7,8,9,10]=CELLCENTERED)" << endl;
+        // fid << "VARLOCATION=([4]=CELLCENTERED)" << endl;
 
         for (int nodeI = 0; nodeI < nNodes; nodeI++)
         {
@@ -1090,6 +1099,10 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
         for (int nodeI = 0; nodeI < nNodes; nodeI++)
         {
             fid <<  z_[blockI][nodeI] <<endl;
+        }
+        for (int nodeI = 0; nodeI < nNodes; nodeI++)
+        {
+            fid <<  node_flag[blockI][nodeI] <<endl;
         }
 
         for (int elementI = 0; elementI < nElements; elementI++)
