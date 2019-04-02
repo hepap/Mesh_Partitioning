@@ -97,10 +97,14 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 	int second_block_id;
 
 	commonFacesVector_ = new std::vector<std::vector<int>>[n_connexions];
+	commonCellsVector_ = new std::vector<std::vector<int>>[n_connexions];
+
+
 
 	for(int conn = 0; conn < n_connexions; conn++)
 	{
 		std::vector<std::vector<int>> common_faces_vector_temp;
+		std::vector<int> common_cells_vector_temp;
 
 		first_block_id = connexionVector_[conn][0];
 		second_block_id = connexionVector_[conn][1];
@@ -145,6 +149,7 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 						if(face_in_boundary.size()>=3)
 						{
 							common_faces_vector_temp.push_back(all_face_2_nodes_connectivity [k]);
+							common_cells_vector_temp.push_back(cell_id);
 						}
 					}
 				}
@@ -182,7 +187,11 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 							if(same_node_count==3)
 							{
 								commonFacesVector_[conn].push_back(common_faces_vector_temp[i]);
+								std::vector<int> common_cells = {common_cells_vector_temp[i],common_cells_vector_temp[j]};
+								commonCellsVector_[conn].push_back(common_cells);
 								common_faces_vector_temp[i].clear();
+								common_faces_vector_temp[j].clear();
+
 							}
 						}
 					}

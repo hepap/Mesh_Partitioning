@@ -11,7 +11,6 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 	cout << "========================STARTING PROGRAM========================" << endl;
-/* 
 	cout << R"(
 *        (       )   (            (          (          (       )     ) (       )
   (  `       )\ ) ( /(   )\ )   (     )\ )  *   ))\ )  *   ))\ ) ( /(  ( /( )\ ) ( /( (
@@ -23,7 +22,7 @@ int main(int argc, char* argv[])
  |_|  |_|___|___/|_||_| |_|   /_/ \_\|_|_\  |_| |___|  |_| |___| \___/|_|\_|___||_|\_|  \___|
 
 	)" << endl;
- */
+
 
 
 
@@ -56,7 +55,7 @@ reconstruct_faces.~ReconstructFaces();
 
 if (argc != 5)
 {
-	std::cout << "Usage: ./metis <single block mesh file> <Number of partitions> <Output mesh file name>\n";
+	std::cout << "Usage: ./metis <single block mesh file> <Number of partitions> <Output mesh file name> <Output topology file name>\n";
 	return 0;
 }
 
@@ -127,16 +126,28 @@ cout<<"Is this happening?!"<<endl;
 // 	}
 // 	cout<<"\n";
 // }
-cout<<reconstruct_faces.connexionVector_.size()<<endl;
-for(int i = 0; i<reconstruct_faces.connexionVector_.size();i++)
-{
-	for(int j = 0; j<reconstruct_faces.connexionVector_[i].size();j++)
-	{
-		cout<<reconstruct_faces.connexionVector_[i][j]<<"\t";
-	}
-	std::cout << '\n';
-}
-
+// int n_connexions = reconstruct_faces.connexionVector_.size();
+//
+// for(int i = 0; i<n_connexions;i++)
+// {
+// 	for(int j = 0; j<reconstruct_faces.commonCellsVector_[i].size();j++)
+// 	{
+// 		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
+// 		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
+// 		std::cout << '\n';
+//
+// 	}
+// 	// for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
+// 	// {
+// 	// 	for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
+// 	// 	{
+// 	// 		cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
+// 	// 	}
+// 	// 	std::cout << '\n';
+// 	//
+// 	// }
+//
+// }
 // ===== Isabelle =====
 
 MetisBoundary* metisBoundary = reader.GetMetisBoundary_();

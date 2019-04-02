@@ -10,7 +10,7 @@ class MetisMesh
 private:
     int* nElements_;
     int* nNodes_;
-    
+
     /*==============HELENE=================*/
     int* elementNbrNodes_;
     int* elementType_;
@@ -36,8 +36,8 @@ private:
     MetisBoundary* metisBoundary_;
     std::vector<int>** connectivity_;
 
-    
-    // std::vector<int>* global2LocalElements_;
+
+    //std::vector<int>* global2LocalElements_;
     //std::vector<int>** connectivity_boundary;
 
 public:
@@ -47,7 +47,7 @@ public:
     friend class MetisBoundary;
     static int nDimensions_;
     vector<vector<int>>* ReturnFaces(int blockI, int element);
-    
+
 
 public:
     MetisBoundary* GetMetisBoundary_();

@@ -15,6 +15,8 @@ public:
 	std::vector<std::vector<int>> commonNodesVector_;
 	std::vector<std::vector<int>> connexionVector_;
 	std::vector<std::vector<int>>* commonFacesVector_;
+	std::vector<std::vector<int>>* commonCellsVector_;
+
 
 
 	ReconstructFaces(int n_blocks, int global_n_elements);
