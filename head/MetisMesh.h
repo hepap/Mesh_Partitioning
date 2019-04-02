@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "MetisBoundary.h"
+#include "ReconstructFaces.h"
 #include "omp.h"
 
 class MetisMesh
@@ -36,8 +37,7 @@ private:
     MetisBoundary* metisBoundary_;
     std::vector<int>** connectivity_;
 
-
-    //std::vector<int>* global2LocalElements_;
+    std::vector<int>* global2LocalElements_;
     //std::vector<int>** connectivity_boundary;
 
 public:
@@ -66,7 +66,7 @@ public:
     std::vector<int>**  getNode2Cells_();
     std::vector<std::string> filesName_;
     // Fonction WriteTopology
-    void WriteTopology(std::string filename);
+    void WriteTopology(std::string filename, ReconstructFaces* reconstruct_faces);
     void ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells);
     void WriteOutputTecplot(std::string fileName);
 
