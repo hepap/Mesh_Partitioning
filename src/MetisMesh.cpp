@@ -22,9 +22,9 @@ int** MetisMesh::getLocal2GlobalNodes_()
 {
   return local2GlobalNodes_;
 }
-int** MetisMesh::getGlobal2LocalNodes_()
+std::vector<int>* MetisMesh::getGlobal2LocalNodes_()
 {
-  return local2GlobalNodes_;
+  return global2LocalNodes_;
 }
 std::vector<int>** MetisMesh::getConnectivity_()
 {
@@ -439,7 +439,7 @@ void MetisMesh::WriteMesh(std::string fileName)
     {
 
         // creer dynamiquement le nom des fichiers partition a partir de linput donne par le user
-        std::string name = fileName + std::to_string(blockI+1) + ".su2"; // C++11 for std::to_string
+        std::string name = fileName + std::to_string(blockI) + ".su2"; // C++11 for std::to_string
         // store name in a vector
         filesName.push_back(name);
 
@@ -449,7 +449,7 @@ void MetisMesh::WriteMesh(std::string fileName)
         int nNodes = nNodes_[blockI];
         int nElements = nElements_[blockI];
 
-        fprintf(fid, "Block= %d\n", blockI + 1);
+        fprintf(fid, "Block= %d\n", blockI );
         fprintf(fid, "NDIME= %d\n", nDimensions_);
         fprintf(fid, "NELEM= %d\n", nElements);
 
@@ -698,6 +698,8 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     std::cout << "newMesh ok" << endl;
 
+    newMesh->global2LocalElements_ = new std::vector<int>[nElements_[0]];
+
     #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
@@ -706,6 +708,9 @@ MetisMesh* MetisMesh::Partition(int nPart)
         for (int i = 0; i < newNelements[blockI]; i++)
         {
             newMesh->local2GlobalElements_[blockI][i] = elementsPerBlock[blockI][i];
+
+            newMesh->global2LocalElements_[elementsPerBlock[blockI][i]].push_back(i);
+            newMesh->global2LocalElements_[elementsPerBlock[blockI][i]].push_back(blockI);
 
         }
     }
@@ -1023,7 +1028,7 @@ void MetisMesh::WriteTopology(std::string fileName)
 
 
 
-void MetisMesh::WriteOutputTecplot(std::string fileName)
+void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
 {
     // FILE *fid = fopen(fileName.c_str(), "w");
     std::ofstream fid;
@@ -1031,7 +1036,7 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
     std::cout << "file open... " << fileName << endl;
 
     fid << "TTILE = \"Vizualisation of the partitioned mesh\""<<endl;
-    fid << "VARIABLES=\"X\",\"Y\",\"Z\"" << endl;
+    fid << "VARIABLES=\"X\",\"Y\",\"Z\",\"FLAG\"" << endl;
 
 
     for (int blockI = 0; blockI < nBlock_; blockI++)
@@ -1041,7 +1046,7 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
         fid << "ZONE T=\"element"<<blockI <<"\""<< endl;
         fid << "Nodes=" << nNodes << ", " << "Elements=" << nElements << ", " << "ZONETYPE=FETETRAHEDRON" << endl;
         fid << "DATAPACKING=BLOCK" << endl;
-        // fid << "VARLOCATION=([4,5,6,7,8,9,10]=CELLCENTERED)" << endl;
+        // fid << "VARLOCATION=([4]=CELLCENTERED)" << endl;
 
         for (int nodeI = 0; nodeI < nNodes; nodeI++)
         {
@@ -1054,6 +1059,10 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
         for (int nodeI = 0; nodeI < nNodes; nodeI++)
         {
             fid <<  z_[blockI][nodeI] <<endl;
+        }
+        for (int nodeI = 0; nodeI < nNodes; nodeI++)
+        {
+            fid <<  node_flag[blockI][nodeI] <<endl;
         }
 
         for (int elementI = 0; elementI < nElements; elementI++)

@@ -126,28 +126,52 @@ cout<<"Is this happening?!"<<endl;
 // 	}
 // 	cout<<"\n";
 // }
-// int n_connexions = reconstruct_faces.connexionVector_.size();
+/*=============================TEST HELENE=============================*/
+int** node_flag = new int*[n_blocks];
+int** cell_flag = new int*[n_blocks];
+
+std::vector<int>* global2LocalNodes =newMesh->getGlobal2LocalNodes_();
+
+for(int i=0;i<n_blocks;i++)
+{
+	node_flag[i] = new int[n_nodes_in_block[i]]();
+	// cell_flag[i] = new int[n_elements_in_block[i]]();
+}
+
+int n_connexions = reconstruct_faces.connexionVector_.size();
 //
-// for(int i = 0; i<n_connexions;i++)
-// {
-// 	for(int j = 0; j<reconstruct_faces.commonCellsVector_[i].size();j++)
-// 	{
-// 		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
-// 		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
-// 		std::cout << '\n';
-//
-// 	}
-// 	// for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
-// 	// {
-// 	// 	for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
-// 	// 	{
-// 	// 		cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
-// 	// 	}
-// 	// 	std::cout << '\n';
-// 	//
-// 	// }
-//
-// }
+for(int i = 0; i<n_connexions;i++)
+{
+	for(int j = 0; j<reconstruct_faces.commonCellsVector_[i].size();j++)
+	{
+		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
+		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
+
+		for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
+		{
+			cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
+			int global_node = reconstruct_faces.commonFacesVector_[i][j][k];
+			int local_node0 = global2LocalNodes[global_node][0];
+			int block0 = global2LocalNodes[global_node][1];
+			int local_node1 = global2LocalNodes[global_node][2];
+			int block1 = global2LocalNodes[global_node][3];
+			node_flag[block0][local_node0] = 1;
+			node_flag[block1][local_node1] = 1;
+
+
+		}
+		std::cout << '\n';
+
+	}
+	// for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
+	// {
+	//
+	//
+	// }
+
+}
+/*=============================TEST HELENE=============================*/
+
 // ===== Isabelle =====
 
 MetisBoundary* metisBoundary = reader.GetMetisBoundary_();
@@ -160,6 +184,6 @@ newMesh->WriteMesh(outputMeshFile);
 
 // ===== Isabelle =====
 //newMesh->WriteTopology(outputTopology);
-//newMesh->WriteOutputTecplot("outputMeshFile.dat");
+newMesh->WriteOutputTecplot("outputMeshFile.dat",node_flag);
 
 }
