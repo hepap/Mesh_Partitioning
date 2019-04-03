@@ -56,7 +56,7 @@ reconstruct_faces.~ReconstructFaces();
 
 if (argc != 5)
 {
-	std::cout << "Usage: ./metis <single block mesh file> <Number of partitions> <Output mesh file name>\n";
+	std::cout << "Usage: ./metis <single block mesh file> <Number of partitions> <Output mesh file name> <Output topology file name>\n";
 	return 0;
 }
 
@@ -111,7 +111,7 @@ for(int k=0; k<n_blocks; k++)
 
 std::vector<int>** globalCell2GlobalNodes = reader.getConnectivity_();
 std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
-
+int* elementBlock = reader.getElementBlock_();
 
 reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
@@ -142,6 +142,7 @@ for(int i = 0; i<reconstruct_faces.connexionVector_.size();i++)
 MetisBoundary* metisBoundary = reader.GetMetisBoundary_();
 
 cout << "ComputeBoundaries " << endl;
+
 newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells);
 // ====================
 
