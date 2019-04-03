@@ -112,8 +112,7 @@ for(int k=0; k<n_blocks; k++)
 
 std::vector<int>** globalCell2GlobalNodes = reader.getConnectivity_();
 std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
-
-
+int* elementBlock = reader.getElementBlock_();
 reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
 cout<<"out of my face hehe"<<endl;
@@ -146,10 +145,8 @@ int n_connexions = reconstruct_faces.connexionVector_.size();
 //
 for(int i = 0; i<n_connexions;i++)
 {
-	for(int j = 0; j<reconstruct_faces.commonCellsVector_[i].size();j++)
+	for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
 	{
-		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
-		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
 		int globalcell0 = reconstruct_faces.commonCellsVector_[i][j][0];
 		int cell0 = global2LocalElements[globalcell0][0];
 		int cellblock0 = global2LocalElements[globalcell0][1];
@@ -158,17 +155,70 @@ for(int i = 0; i<n_connexions;i++)
 		int cell1 = global2LocalElements[globalcell1][0];
 		int cellblock1 = global2LocalElements[globalcell1][1];
 		cell_flag[cellblock1][cell1] = 2;
+		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
+		cout<<cellblock0<<"\t";
+		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
+		cout<<cellblock1<<"\t";
 
 		for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
 		{
 			cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
 			int global_node = reconstruct_faces.commonFacesVector_[i][j][k];
-			int local_node0 = global2LocalNodes[global_node][0];
-			int block0 = global2LocalNodes[global_node][1];
-			int local_node1 = global2LocalNodes[global_node][2];
-			int block1 = global2LocalNodes[global_node][3];
-			node_flag[block0][local_node0] = 1;
-			node_flag[block1][local_node1] = 1;
+			if(global2LocalNodes[global_node].size()==4)
+			{
+				int local_node0 = global2LocalNodes[global_node][0];
+				int block0 = global2LocalNodes[global_node][1];
+				int local_node1 = global2LocalNodes[global_node][2];
+				int block1 = global2LocalNodes[global_node][3];
+				node_flag[block0][local_node0] = 1;
+				node_flag[block1][local_node1] = 1;
+			}
+			else if(global2LocalNodes[global_node].size()==6)
+			{
+				int local_node0 = global2LocalNodes[global_node][0];
+				int block0 = global2LocalNodes[global_node][1];
+				int local_node1 = global2LocalNodes[global_node][2];
+				int block1 = global2LocalNodes[global_node][3];
+				int local_node2 = global2LocalNodes[global_node][4];
+				int block2 = global2LocalNodes[global_node][5];
+				node_flag[block0][local_node0] = 1;
+				node_flag[block1][local_node1] = 1;
+				node_flag[block2][local_node2] = 1;
+			}
+			else if(global2LocalNodes[global_node].size()==8)
+			{
+				int local_node0 = global2LocalNodes[global_node][0];
+				int block0 = global2LocalNodes[global_node][1];
+				int local_node1 = global2LocalNodes[global_node][2];
+				int block1 = global2LocalNodes[global_node][3];
+				int local_node2 = global2LocalNodes[global_node][4];
+				int block2 = global2LocalNodes[global_node][5];
+				int local_node3 = global2LocalNodes[global_node][6];
+				int block3 = global2LocalNodes[global_node][7];
+				node_flag[block0][local_node0] = 1;
+				node_flag[block1][local_node1] = 1;
+				node_flag[block2][local_node2] = 1;
+				node_flag[block3][local_node3] = 1;
+			}
+			else if(global2LocalNodes[global_node].size()==10)
+			{
+				int local_node0 = global2LocalNodes[global_node][0];
+				int block0 = global2LocalNodes[global_node][1];
+				int local_node1 = global2LocalNodes[global_node][2];
+				int block1 = global2LocalNodes[global_node][3];
+				int local_node2 = global2LocalNodes[global_node][4];
+				int block2 = global2LocalNodes[global_node][5];
+				int local_node3 = global2LocalNodes[global_node][6];
+				int block3 = global2LocalNodes[global_node][7];
+				int local_node4 = global2LocalNodes[global_node][8];
+				int block4 = global2LocalNodes[global_node][9];
+				node_flag[block0][local_node0] = 1;
+				node_flag[block1][local_node1] = 1;
+				node_flag[block2][local_node2] = 1;
+				node_flag[block3][local_node3] = 1;
+				node_flag[block4][local_node4] = 1;
+
+			}
 		}
 		std::cout << '\n';
 
@@ -187,7 +237,8 @@ for(int i = 0; i<n_connexions;i++)
 MetisBoundary* metisBoundary = reader.GetMetisBoundary_();
 
 cout << "ComputeBoundaries " << endl;
-newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells);
+
+newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells, global2LocalNodes);
 // ====================
 
 newMesh->WriteMesh(outputMeshFile);

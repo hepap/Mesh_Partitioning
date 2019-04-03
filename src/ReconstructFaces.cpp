@@ -103,6 +103,10 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 
 	for(int conn = 0; conn < n_connexions; conn++)
 	{
+		for(int cell_idx = 0; cell_idx<global_n_elements_;cell_idx++)
+		{
+			cell_flag_4_face_reconstruction_[cell_id]=0;
+		}
 		std::vector<std::vector<int>> common_faces_vector_temp;
 		std::vector<int> common_cells_vector_temp;
 
@@ -114,6 +118,7 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 
 		for(int i = 0; i<n_common_nodes;i++)
 		{
+
 			node_id = common_nodes_vector[i];
 			node_2_cells_connectivity = global_nodes_vector[0][node_id];
 			n_cells_in_node = node_2_cells_connectivity.size();
@@ -153,27 +158,34 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 						}
 					}
 				}
-				cell_flag_4_face_reconstruction_[cell_id] = 1;
+				// cell_flag_4_face_reconstruction_[cell_id] = 1;
 			}
 		}
+
+		std::vector<int> cell_flag(common_cells_vector_temp.size(),0);
+		std::vector<int> face_flag(common_faces_vector_temp.size(),0);
+
+
 
 
 		for(int i=0; i<common_faces_vector_temp.size();i++)
 		{
-			std::vector<int> face_checked = common_faces_vector_temp[i];
 
-			if(face_checked.size()!=0)
+			if(face_flag[i]==0)
 			{
+				std::vector<int> face_checked = common_faces_vector_temp[i];
+
 				std::sort(face_checked.begin(),face_checked.end());
 
 				for(int j=0; j<common_faces_vector_temp.size();j++)
 				{
 					if(i!=j)
 					{
-						std::vector<int> face_in_common_face_vector_temp= common_faces_vector_temp[j];
 
-						if(face_in_common_face_vector_temp.size()!=0)
+						if(face_flag[j]==0)
 						{
+							std::vector<int> face_in_common_face_vector_temp= common_faces_vector_temp[j];
+
 							std::sort(face_in_common_face_vector_temp.begin(),face_in_common_face_vector_temp.end());
 
 							int same_node_count=0;
@@ -189,8 +201,14 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 								commonFacesVector_[conn].push_back(common_faces_vector_temp[i]);
 								std::vector<int> common_cells = {common_cells_vector_temp[i],common_cells_vector_temp[j]};
 								commonCellsVector_[conn].push_back(common_cells);
-								common_faces_vector_temp[i].clear();
-								common_faces_vector_temp[j].clear();
+								// common_faces_vector_temp[i].resize(0);
+								// common_faces_vector_temp[j].resize(0);
+								face_flag[i]=1;
+								face_flag[j]=1;
+
+								cell_flag[i]=1;
+								cell_flag[j]=1;
+								break;
 
 							}
 						}
