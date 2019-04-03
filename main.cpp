@@ -193,7 +193,7 @@ newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells);
 newMesh->WriteMesh(outputMeshFile);
 
 // ===== Isabelle =====
-//newMesh->WriteTopology(outputTopology);
 newMesh->WriteOutputTecplot("outputMeshFile.dat",node_flag,cell_flag);
+newMesh->WriteTopology(outputTopology, &reconstruct_faces);
 
 }

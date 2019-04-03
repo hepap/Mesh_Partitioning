@@ -453,7 +453,8 @@ void MetisMesh::WriteMesh(std::string fileName)
         int nNodes = nNodes_[blockI];
         int nElements = nElements_[blockI];
 
-        fprintf(fid, "Block= %d\n", blockI );
+
+        fprintf(fid, "Block= %d\n", blockI);
         fprintf(fid, "NDIME= %d\n", nDimensions_);
         fprintf(fid, "NELEM= %d\n", nElements);
 
@@ -988,8 +989,8 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
 }
 
 
-/*
-void MetisMesh::WriteTopology(std::string fileName)
+
+void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruct_faces)
 {
 
     FILE *fid = fopen(fileName.c_str(), "w");
@@ -998,7 +999,7 @@ void MetisMesh::WriteTopology(std::string fileName)
     std::cout << "Topology file opened.................. " << fileName << endl;
     //std::cout << newMesh->filesName_[0] << endl;
     fprintf(fid, "NBLOCK= %d\n", nBlock_);
-
+    
     for (int blockI = 0; blockI < nBlock_; blockI++) {
         fprintf(fid, "%s\n", filesName_[blockI].c_str());
     }
@@ -1006,29 +1007,68 @@ void MetisMesh::WriteTopology(std::string fileName)
     for (int blockI = 0; blockI < nBlock_; blockI++)
     {
 
-        //int nNodes = nNodes_[blockI];
-        int nElements = nElements_[blockI];
+        
+        fprintf(fid, "Block= %d\n", blockI );
 
-        nTotalBoundaries_[blockI] //will store NMARK physique + NMARK conn
-        int nBoundaries = nTotalBoundaries_[blockI];
-        fprintf(fid, "Block= %d\n", blockI + 1);
+        // Check how many connexions in block
+        vector<int> connexions_in_block_idx;
 
-        for (int i = 0; i < nBoundaries; i++) {
+        for (int j=0;j<reconstruct_faces->connexionVector_.size();j++)
+        {
+            if ((reconstruct_faces->connexionVector_[j][0]==blockI)||(reconstruct_faces->connexionVector_[j][1]==blockI))
+            {
+                connexions_in_block_idx.push_back(j);
+            }
+        }
+        
+        // Print n_connexions_in_block
+        fprintf(fid, "Nconnexion= %d\n", connexions_in_block_idx.size() );
 
-            fprintf(fid, "NELEM= %d\n", nElementsInBoundaries_[i]);
 
+        for (int j=0;j<connexions_in_block_idx.size();j++)
+        {
+            int connexion_idx=connexions_in_block_idx[j];
+            // Print Nmark for connexions
+            if (reconstruct_faces->connexionVector_[connexion_idx][0]==blockI)
+            {
+                fprintf(fid, "Nmark= %d\n", reconstruct_faces->connexionVector_[connexion_idx][1] );
+            
+            }
+            else
+            {
+                fprintf(fid, "Nmark= %d\n", reconstruct_faces->connexionVector_[connexion_idx][0] );
+            }
 
-            for (int j = 0; j < nElementsInBoundaries_[i]; j++) {
-
-                fprintf(fid, "%d ", whatEverStructureWeStoreBoundaryIn_[blockI][i][j]);
+            // Print Nelems for connexions
+            fprintf(fid, "Nelems= %d\n", reconstruct_faces->commonCellsVector_[connexion_idx].size() );
+            
+            // Print each elem
+            for (int k=0;k<reconstruct_faces->commonCellsVector_[connexion_idx].size();k++)
+            {
+                // FOR NOW PRINT 0 AND 1 LOCAL ALONG WITH IDX BLOCK
+                int global2local_elem_0=global2LocalElements_[reconstruct_faces->commonCellsVector_[connexion_idx][k][0]][0];
+                int global2local_block_0=global2LocalElements_[reconstruct_faces->commonCellsVector_[connexion_idx][k][0]][1];
+                int global2local_elem_1=global2LocalElements_[reconstruct_faces->commonCellsVector_[connexion_idx][k][1]][0];
+                int global2local_block_1=global2LocalElements_[reconstruct_faces->commonCellsVector_[connexion_idx][k][1]][1];
+               
+                if (global2local_block_0==blockI)
+                {
+                    fprintf(fid, "%d\n", global2local_elem_0);
+                }
+                else 
+                {
+                    fprintf(fid, "%d\n", global2local_elem_1);
+                }
             }
         }
 
-    }
+        
 
+    }
+    
     fclose(fid);
     std::cout << fileName << "output file closed ..." << endl;
-}  */
+}  
 
 
 
