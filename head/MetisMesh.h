@@ -58,17 +58,18 @@ public:
     MetisMesh* Partition(int nPart);
     void SetConnectivity(std::vector<int>** connectivity_);
     int NumberOfNodes(int elementType);
+    int ReturnLocalNode(int globalNode, int localBlock, std::vector<int>* getGlobal2LocalNodes);
     int* getElementBlock_();
     int* getNNodes_();
     int* getNElements_();
     int** getLocal2GlobalNodes_();
-    int** getGlobal2LocalNodes_();
+    std::vector<int>* getGlobal2LocalNodes_();
     std::vector<int>** getConnectivity_();
     std::vector<int>**  getNode2Cells_();
     std::vector<std::string> filesName_;
     // Fonction WriteTopology
     void WriteTopology(std::string filename);
-    void ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells);
+    void ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells, std::vector<int>* getGlobal2LocalNodes);
     void WriteOutputTecplot(std::string fileName);
 
 };

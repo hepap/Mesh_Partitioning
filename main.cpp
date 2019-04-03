@@ -112,7 +112,7 @@ for(int k=0; k<n_blocks; k++)
 std::vector<int>** globalCell2GlobalNodes = reader.getConnectivity_();
 std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
 int* elementBlock = reader.getElementBlock_();
-
+vector<int>* global2LocalNodes = newMesh->getGlobal2LocalNodes_();
 reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
 cout<<"out of my face hehe"<<endl;
@@ -143,7 +143,7 @@ MetisBoundary* metisBoundary = reader.GetMetisBoundary_();
 
 cout << "ComputeBoundaries " << endl;
 
-newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells);
+newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells, global2LocalNodes);
 // ====================
 
 newMesh->WriteMesh(outputMeshFile);

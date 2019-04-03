@@ -22,10 +22,6 @@ int** MetisMesh::getLocal2GlobalNodes_()
 {
   return local2GlobalNodes_;
 }
-int** MetisMesh::getGlobal2LocalNodes_()
-{
-  return local2GlobalNodes_;
-}
 std::vector<int>** MetisMesh::getConnectivity_()
 {
   return connectivity_;
@@ -47,6 +43,10 @@ int* MetisMesh::getElementBlock_()
 {
   return elementBlock_;
 } 
+std::vector<int>* MetisMesh::getGlobal2LocalNodes_()
+{
+  return global2LocalNodes_;
+}
 /*=======================================*/
 
 
@@ -598,11 +598,11 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     
     int* elementBlock_ = new int[nElements_[0]];
-    cout << "elementBlock_" << elementBlock_ << endl;
+
     for (int i = 0; i < nElements_[0]; i++)
     {
         elementBlock_[i] = epart[i];
-        cout << elementBlock_[i] << endl;
+        std::cout << "element" << i << " = " << elementBlock_[i] << endl;
         int blockId = epart[i];
         elementsPerBlock[blockId].push_back(i);
         elementNbrNodesPerBlock[blockId].push_back(elementNbrNodes_[i]);
@@ -732,7 +732,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
         /*==============HELENE=================*/
         int size = addedNode[blockI].size();
         newMesh->local2GlobalNodes_[blockI] = new int[size];
-        cout << size << endl;
+        
         /*=====================================*/
        
         for (int i = 0; i < size; i++)
@@ -746,6 +746,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
             newMesh->local2GlobalNodes_[blockI][i] = nodeId;
             newMesh->global2LocalNodes_[nodeId].push_back(i);
             newMesh->global2LocalNodes_[nodeId].push_back(blockI);
+
             /*=====================================*/
         }
     }
@@ -768,7 +769,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
         delete[] eind;
     eind = nullptr;
 
-    std::cout << "newMesh returned" << endl;
+    
 
     // TODO: Check if newMesh should (like in this case), have a pointer to local2global or create its own structure.
     // Pas le choix de copier les attributs dans le newMesh car cest sur lui que l<on call la fonction WriteMesh
@@ -776,133 +777,12 @@ MetisMesh* MetisMesh::Partition(int nPart)
     local2GlobalElements_ = newMesh->local2GlobalElements_;
     newMesh->elementNbrNodes_ = elementNbrNodes_;
     newMesh->elementBlock_ = elementBlock_;
-    std::cout << "will it happend" << endl;
-
+    
+    std::cout << "newMesh returned" << endl;
 
     return newMesh;
 
 }
-/*
-
-Mesh* Mesh::Partition(int nPart)
-{
-    if (nBlock_ > 1)
-    {
-        throw std::runtime_error("Cannot partition a multiblock mesh!");
-    }
-
-    int eptr[nElements_[0] + 1];
-    int eind[nElements_[0] * 3];
-
-    // Converting conncectivity into METIS data structure See Metis reference doc
-    eptr[0] = 0;
-    int count = 0;
-
-    for (int i = 1; i < nElements_[0]+1; i++)
-    {
-        count += 3;
-        eptr[i] = count;
-    }
-
-    for (int i = 0; i < nElements_[0]; i++)
-    {
-        eind[i*3]   = connectivity_[0][i][0]-1;
-        eind[i*3+1] = connectivity_[0][i][1]-1;
-        eind[i*3+2] = connectivity_[0][i][2]-1;
-    }
-
-    int ncommon(2);
-    int objval;
-
-    int epart[nElements_[0]];
-    int npart[nNodes_[0]];
-
-    int success = METIS_PartMeshDual(&nElements_[0], &nNodes_[0], &eptr[0], &eind[0], NULL, NULL,
-                                     &ncommon, &nPart, NULL, NULL, &objval,
-                                     &epart[0], &npart[0]);
-
-    std::cout << "Partition Success: " << success << std::endl;
-
-    std::vector<int> elementsPerBlock[nPart];
-    std::vector<int> nodesPerBlock[nPart];
-
-    for (int i = 0; i < nElements_[0]; i++)
-    {
-        int blockId = epart[i];
-        elementsPerBlock[blockId].push_back(i);
-    }
-
-    for (int i = 0; i < nNodes_[0]; i++)
-    {
-        int blockId = npart[i];
-        nodesPerBlock[blockId].push_back(i);
-    }
-
-    int newNelements[nPart];
-
-    for (int blockI = 0; blockI < nPart; blockI++)
-        newNelements[blockI] = elementsPerBlock[blockI].size();
-
-    std::vector<int> addedNode[nPart];
-    std::vector<int>** newConnectivity;
-
-    newConnectivity = new std::vector<int>*[nPart];
-
-    for (int blockI = 0; blockI < nPart; blockI++)
-    {
-        newConnectivity[blockI] = new std::vector<int>[newNelements[blockI]];
-
-        for (int i = 0; i < newNelements[blockI]; i++)
-        {
-            int n1 = connectivity_[0][elementsPerBlock[blockI][i]][0];
-            int n2 = connectivity_[0][elementsPerBlock[blockI][i]][1];
-            int n3 = connectivity_[0][elementsPerBlock[blockI][i]][2];
-
-            int newN1 = findNodeIndex(addedNode[blockI], n1);
-            int newN2 = findNodeIndex(addedNode[blockI], n2);
-            int newN3 = findNodeIndex(addedNode[blockI], n3);
-
-            newConnectivity[blockI][i].push_back(newN1);
-            newConnectivity[blockI][i].push_back(newN2);
-            newConnectivity[blockI][i].push_back(newN3);
-        }
-    }
-
-    int newNnodes[nPart];
-
-    for (int blockI = 0; blockI < nPart; blockI++)
-    {
-        newNnodes[blockI] = addedNode[blockI].size();
-    }
-
-    Mesh* newMesh = new Mesh();
-    newMesh->Init(nPart, newNelements, newNnodes);
-    newMesh->SetConnectivity(newConnectivity);
-
-    for (int blockI = 0; blockI < nPart; blockI++)
-    {
-        int size(addedNode[blockI].size());
-        for (int i = 0; i < size; i++)
-        {
-            int nodeId = addedNode[blockI][i]-1;
-
-            newMesh->x_[blockI][i] = x_[0][nodeId];
-            newMesh->y_[blockI][i] = y_[0][nodeId];
-            newMesh->z_[blockI][i] = z_[0][nodeId];
-        }
-    }
-
-    for (int blockI = 0; blockI < nPart; blockI++)
-    {
-        if (newConnectivity[blockI] != nullptr) delete [] newConnectivity[blockI];
-        newConnectivity[blockI] = nullptr;
-    }
-
-    if (newConnectivity != nullptr) delete [] newConnectivity;
-    newConnectivity = nullptr;
-
-    return newMesh;
-}*/
 
 void MetisMesh::SetConnectivity(std::vector<int> **connectivity)
 {
@@ -913,37 +793,30 @@ void MetisMesh::SetConnectivity(std::vector<int> **connectivity)
 }
 
 
-
-
-void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2GlobalCells) 
+void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2GlobalCells, std::vector<int>* global2LocalNodes) 
 {
-    //std::vector<int>** globalNode2GlobalCells = getNode2Cells_();
-    cout << "ALLLLOOO " << endl;
+   // vector <int>** globalNode2LocalNodes = this->getGlobal2LocalNodes_();
+
+    std::cout << "ALLLLOOO " << endl;
     std::vector<int> **newBoundaryConnectivity;
     newBoundaryConnectivity = new std::vector<int> *[nBlock_];
     std::vector<int> node1;
     std::vector<int> node2;
     std::vector<int> face2Block;
-
     int commonGlobalElement;    
-            
-     /* 
-        cout << "elementBlock_ " << elementBlock_ << endl;
-        cout << "nElements_[0] " << nElements_[0] << endl;
-        for (int i = 0; i < 27; i++)
-        {
-        //cout << "elementBlock[i]" << elementBlock[i] << endl;
-        cout << "elementBlock_[i] " << " " << i << " : " << elementBlock_[i] << endl;
-         
-        }  */
+
+     
+  
 
     for (int boundaryI = 0; boundaryI < metisBoundary->nBoundaries_; boundaryI++) {
     std::cout << "------ " << boundaryI << " ------" << endl;
+        int boundaryElementNbr = metisBoundary->boundaryNelements_[boundaryI];
+        newBoundaryConnectivity[boundaryI] = new std::vector<int> [boundaryElementNbr];
 
         // accede a chacun des faces de la frontiere
-        for (int i = 0; i < metisBoundary->boundaryNelements_[boundaryI]; i++) {
+        for (int i = 0; i < boundaryElementNbr; i++) {
 
-            std::cout << "frontiere " << i << endl;
+            std::cout << " ----------- frontiere ---------- " << i << endl;
             int sizeBoundary = metisBoundary->boundaryElementNbrNodes_[boundaryI][i];
             int firstNode = metisBoundary->boundaryConnectivity_[boundaryI][i][0];
             node1 = globalNode2GlobalCells[0][firstNode];
@@ -956,6 +829,7 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
                 
                 // un seul noeud de lelement face
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][j];
+
                 node2 = globalNode2GlobalCells[0][globalNode];
                 std::sort(node2.begin(), node2.end());
                 std::vector<int>::iterator it;
@@ -966,30 +840,61 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
 
                 if (vCommon.size() == 1) {
                     commonGlobalElement = vCommon[0];
-                    cout << "Lelement commun pour la face " << i << " est : " << commonGlobalElement << endl;
+                    //cout << "Lelement commun pour la face " << i << " est : " << commonGlobalElement << endl;
                     // structure contenant pour chaque face, dans quel block elles sont
-                    face2Block[i] = elementBlock_[vCommon[0]];
+                    face2Block.push_back(elementBlock_[commonGlobalElement]);
+                    std::cout << "La face a la frontiere " << i << " appartient au block " << face2Block[i] << endl;
+
                     //cout << "face2Block[i] " << face2Block[i] << endl;
-                    cout << "Lelement commun est dans le block " << elementBlock_[vCommon[0]] << endl;
+                    //cout << "Lelement commun est dans le block " << elementBlock_[commonGlobalElement] << endl;
                     break;
                 }
                 else {
                     node1 = vCommon; 
                 }
-
-                //cout << "face2Block[i] " << face2Block[i] << endl;
-                //std::cout << "globalNode2GlobalCells[i] " << globalNode2GlobalCells[i] << endl;
-                //cout << "vCommon[0]" << vCommon[0] << endl;
-                //cout << "elementBlock_[vCommon[0]]" << elementBlock_[vCommon[0]] << endl;
-                
-     
+                //std::cout << "La face a la frontiere " << i << "appartient au block " << face2Block[i] << endl;
             }
             
+           for (int k = 0; k < sizeBoundary; k++) 
+            {
+
+                int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][k];
+                //std::cout << "globalNode " << globalNode << endl;
+                int localBlock = face2Block[i];
+                //std::cout << "localBlock = " << localBlock << endl;
+                int localNode = ReturnLocalNode(globalNode, localBlock, global2LocalNodes);
+                //std::cout << "localNode " << localNode << endl;
+
+                // PAS SURE QUE CA CEST BON, IL FAUT REFLECHIR LES FRONTIERES SONT DANS QUEL BLOC
+
+                // Afin de les push back dans une connectivité LOCALE propre a chaque partition
+                // Exemple FARFIELD = traduction de la frontiere FARFIELD du uniblock
+                // connectivity_[blockId][element][localNode]
+                //newBoundaryConnectivity[boundaryI][i].push_back(localNode);
+                //cout << "newBoundaryConn = " << newBoundaryConnectivity[boundaryI][i][j] << endl;
+            } 
+            //cout << endl;
         }
 
     }
 }
 
+int MetisMesh::ReturnLocalNode(int globalNode, int localBlock, std::vector<int>* global2LocalNodes) {
+
+    int localNode = 0;
+    int i = 1;
+    int index = global2LocalNodes[globalNode][i];
+  
+    while (index != localBlock) {
+        i = i + 2;
+        index = global2LocalNodes[globalNode][i];
+    }
+   
+    localNode = global2LocalNodes[globalNode][i-1];  
+
+    return localNode;
+
+}
 
 /*
 void MetisMesh::WriteTopology(std::string fileName)
@@ -1105,25 +1010,3 @@ void MetisMesh::WriteOutputTecplot(std::string fileName)
     std::cout << fileName << "output file closed ..." << endl;
 }
 
-/* std::vector<std::string> intersection(std::vector<std::string> &v1,
-                                      std::vector<std::string> &v2){
-    std::vector<std::string> v3;
-
-    std::sort(v1.begin(), v1.end());
-    std::sort(v2.begin(), v2.end());
-
-    std::set_intersection(v1.begin(),v1.end(),
-                          v2.begin(),v2.end(),
-                          back_inserter(v3));
-    return v3;
-}
-
-int main(){
-    std::vector<std::string> v1 {"a","b","c"};
-    std::vector<std::string> v2 {"b","c"};
-
-    auto v3 = intersection(v1, v2);
-
-    for(std::string n : v3)
-        std::cout << n << ' ';
-} */
