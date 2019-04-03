@@ -81,6 +81,8 @@ std::vector<int> common_nodes_vector;
 
 int** node_array = newMesh ->getLocal2GlobalNodes_();
 int* n_nodes_in_block = newMesh ->getNNodes_();
+int* n_elements_in_block = newMesh ->getNElements_();
+
 
 for(int k=0; k<n_blocks; k++)
 {
@@ -131,11 +133,13 @@ int** node_flag = new int*[n_blocks];
 int** cell_flag = new int*[n_blocks];
 
 std::vector<int>* global2LocalNodes =newMesh->getGlobal2LocalNodes_();
+std::vector<int>* global2LocalElements =newMesh->getGlobal2LocalElements_();
+
 
 for(int i=0;i<n_blocks;i++)
 {
 	node_flag[i] = new int[n_nodes_in_block[i]]();
-	// cell_flag[i] = new int[n_elements_in_block[i]]();
+	cell_flag[i] = new int[n_elements_in_block[i]]();
 }
 
 int n_connexions = reconstruct_faces.connexionVector_.size();
@@ -146,6 +150,14 @@ for(int i = 0; i<n_connexions;i++)
 	{
 		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
 		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
+		int globalcell0 = reconstruct_faces.commonCellsVector_[i][j][0];
+		int cell0 = global2LocalElements[globalcell0][0];
+		int cellblock0 = global2LocalElements[globalcell0][1];
+		cell_flag[cellblock0][cell0] = 2;
+		int globalcell1 = reconstruct_faces.commonCellsVector_[i][j][1];
+		int cell1 = global2LocalElements[globalcell1][0];
+		int cellblock1 = global2LocalElements[globalcell1][1];
+		cell_flag[cellblock1][cell1] = 2;
 
 		for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
 		{
@@ -157,8 +169,6 @@ for(int i = 0; i<n_connexions;i++)
 			int block1 = global2LocalNodes[global_node][3];
 			node_flag[block0][local_node0] = 1;
 			node_flag[block1][local_node1] = 1;
-
-
 		}
 		std::cout << '\n';
 
@@ -184,6 +194,6 @@ newMesh->WriteMesh(outputMeshFile);
 
 // ===== Isabelle =====
 //newMesh->WriteTopology(outputTopology);
-newMesh->WriteOutputTecplot("outputMeshFile.dat",node_flag);
+newMesh->WriteOutputTecplot("outputMeshFile.dat",node_flag,cell_flag);
 
 }

@@ -26,6 +26,10 @@ std::vector<int>* MetisMesh::getGlobal2LocalNodes_()
 {
   return global2LocalNodes_;
 }
+std::vector<int>* MetisMesh::getGlobal2LocalElements_()
+{
+  return global2LocalElements_;
+}
 std::vector<int>** MetisMesh::getConnectivity_()
 {
   return connectivity_;
@@ -1028,7 +1032,7 @@ void MetisMesh::WriteTopology(std::string fileName)
 
 
 
-void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
+void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag, int** cell_flag)
 {
     // FILE *fid = fopen(fileName.c_str(), "w");
     std::ofstream fid;
@@ -1036,7 +1040,7 @@ void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
     std::cout << "file open... " << fileName << endl;
 
     fid << "TTILE = \"Vizualisation of the partitioned mesh\""<<endl;
-    fid << "VARIABLES=\"X\",\"Y\",\"Z\",\"FLAG\"" << endl;
+    fid << "VARIABLES=\"X\",\"Y\",\"Z\",\"FLAGNODE\",\"FLAGCELL\"" << endl;
 
 
     for (int blockI = 0; blockI < nBlock_; blockI++)
@@ -1046,7 +1050,7 @@ void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
         fid << "ZONE T=\"element"<<blockI <<"\""<< endl;
         fid << "Nodes=" << nNodes << ", " << "Elements=" << nElements << ", " << "ZONETYPE=FETETRAHEDRON" << endl;
         fid << "DATAPACKING=BLOCK" << endl;
-        // fid << "VARLOCATION=([4]=CELLCENTERED)" << endl;
+        fid << "VARLOCATION=([5]=CELLCENTERED)" << endl;
 
         for (int nodeI = 0; nodeI < nNodes; nodeI++)
         {
@@ -1064,6 +1068,10 @@ void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
         {
             fid <<  node_flag[blockI][nodeI] <<endl;
         }
+        for (int elementI = 0; elementI < nElements; elementI++)
+        {
+            fid <<  cell_flag[blockI][elementI] <<endl;
+        }
 
         for (int elementI = 0; elementI < nElements; elementI++)
         {
@@ -1076,14 +1084,10 @@ void MetisMesh::WriteOutputTecplot(std::string fileName, int** node_flag)
 
             fid<< "\n";
         }
-
-        std::cout << "access connectivity elements block " << blockI << endl;
-
-        std::cout << "access nodes block " << blockI << endl;
     }
 
     fid.close();
-    std::cout << fileName << "output file closed ..." << endl;
+    std::cout << fileName << "outputTecplot file closed ..." << endl;
 }
 
 /* std::vector<std::string> intersection(std::vector<std::string> &v1,

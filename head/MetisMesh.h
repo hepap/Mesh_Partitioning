@@ -62,13 +62,14 @@ public:
     int* getNElements_();
     int** getLocal2GlobalNodes_();
     std::vector<int>* getGlobal2LocalNodes_();
+    std::vector<int>* getGlobal2LocalElements_();
     std::vector<int>** getConnectivity_();
     std::vector<int>**  getNode2Cells_();
     std::vector<std::string> filesName_;
     // Fonction WriteTopology
     void WriteTopology(std::string filename);
     void ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vector<int>** globalNode2globalCells);
-    void WriteOutputTecplot(std::string fileName, int** node_flag);
+    void WriteOutputTecplot(std::string fileName, int** node_flag,int** cell_flag);
 
 };
 
