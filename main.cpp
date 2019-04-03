@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-	cout << "========================STARTING PROGRAM========================" << endl;
+/* 	cout << "========================STARTING PROGRAM========================" << endl;
 	cout << R"(
 *        (       )   (            (          (          (       )     ) (       )
   (  `       )\ ) ( /(   )\ )   (     )\ )  *   ))\ )  *   ))\ ) ( /(  ( /( )\ ) ( /( (
@@ -24,7 +24,7 @@ int main(int argc, char* argv[])
 	)" << endl;
 
 
-
+ */
 
 /*=============================TEST HELENE=============================
 		int n_blocks = 2;
@@ -155,14 +155,14 @@ for(int i = 0; i<n_connexions;i++)
 		int cell1 = global2LocalElements[globalcell1][0];
 		int cellblock1 = global2LocalElements[globalcell1][1];
 		cell_flag[cellblock1][cell1] = 2;
-		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
+	/* 	cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
 		cout<<cellblock0<<"\t";
 		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
-		cout<<cellblock1<<"\t";
+		cout<<cellblock1<<"\t"; */
 
 		for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
 		{
-			cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
+			//cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
 			int global_node = reconstruct_faces.commonFacesVector_[i][j][k];
 			if(global2LocalNodes[global_node].size()==4)
 			{
@@ -220,14 +220,9 @@ for(int i = 0; i<n_connexions;i++)
 
 			}
 		}
-		std::cout << '\n';
+		//std::cout << endl;
 
 	}
-	// for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
-	// {
-	//
-	//
-	// }
 
 }
 /*=============================TEST HELENE=============================*/

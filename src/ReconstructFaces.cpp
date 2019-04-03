@@ -133,7 +133,7 @@ void ReconstructFaces::FindElementsInConnexion(std::vector<int>** global_cells_v
 					n_nodes_in_cell = cell_2_nodes_connectivity.size();
 					all_face_2_nodes_connectivity = CreateFaces(cell_2_nodes_connectivity);
 
-					for(size_t k = 0; k<all_face_2_nodes_connectivity.size();k++)
+					for(int k = 0; k<all_face_2_nodes_connectivity.size();k++)
 					{
 						std::vector<int> face_2_nodes_connectivity = all_face_2_nodes_connectivity [k];
 
