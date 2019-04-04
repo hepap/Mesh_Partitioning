@@ -1,6 +1,6 @@
 NBLOCK= 2
-cubetest0.su2
-cubetest1.su2
+cube2test0.su2
+cube2test1.su2
 Block= 0
 Nconnexion= 1
 Nmark= 1

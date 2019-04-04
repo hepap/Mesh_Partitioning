@@ -10,6 +10,7 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+cout << "This is the main " << endl;
 /* 	cout << "========================STARTING PROGRAM========================" << endl;
 	cout << R"(
 *        (       )   (            (          (          (       )     ) (       )
@@ -58,6 +59,7 @@ if (argc != 5)
 	std::cout << "Usage: ./metis <single block mesh file> <Number of partitions> <Output mesh file name> <Output topology file name>\n";
 	return 0;
 }
+
 
   //Metis' routine
 
