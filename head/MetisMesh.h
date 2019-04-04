@@ -5,6 +5,7 @@
 #include "MetisBoundary.h"
 #include "ReconstructFaces.h"
 #include "omp.h"
+#include <map>
 
 class MetisMesh
 {
@@ -40,6 +41,7 @@ private:
     std::vector<int>* global2LocalElements_;
     int* elementBlock_;
 
+    //std::map<pair<int, int>, vector<vector<int>>>* localBoundary_;
     // std::vector<int>* global2LocalElements_;
     //std::vector<int>** connectivity_boundary;
 

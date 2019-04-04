@@ -821,7 +821,7 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
     newBoundaryConnectivity = new std::vector<int> *[nBlock_];
     std::vector<int> node1;
     std::vector<int> node2;
-    std::vector<int> face2Block;
+    
     int commonGlobalElement;
 
 
@@ -830,8 +830,10 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
     for (int boundaryI = 0; boundaryI < metisBoundary->nBoundaries_; boundaryI++)
     {
 
+        std::vector<int> face2Block;
         // std::cout << "------ " << boundaryI << " ------" << endl;
         int boundaryElementNbr = metisBoundary->boundaryNelements_[boundaryI];
+        
         newBoundaryConnectivity[boundaryI] = new std::vector<int> [boundaryElementNbr];
         // Map <BoundaryIndex, BlockNumber> to a vector<vector<int>>
         std::map<pair<int, int>, vector<vector<int>>>* localBoundary = new map<pair<int, int>, vector<vector<int>>>;
@@ -879,7 +881,7 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
                 }
                 //std::cout << "La face a la frontiere " << i << "appartient au block " << face2Block[i] << endl;
             }
-            cout << "Fuck le vec \n";
+            
             cout << "size is " << face2Block.size() << "\n";
                 int localBlock = face2Block[i];
             vector<int> localBoundaryElement(sizeBoundary);
@@ -887,10 +889,10 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
             {
 
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][k];
-                std::cout << "globalNode " << globalNode << endl;
-                std::cout << "localBlock = " << localBlock << endl;
+                // std::cout << "globalNode " << globalNode << endl;
+                // std::cout << "localBlock = " << localBlock << endl;
                 int localNode = ReturnLocalNode(globalNode, localBlock, global2LocalNodes);
-                std::cout << "localNode " << localNode << endl;
+                // std::cout << "localNode " << localNode << endl;
                 localBoundaryElement.push_back(localNode);
 
                 // PAS SURE QUE CA CEST BON, IL FAUT REFLECHIR LES FRONTIERES SONT DANS QUEL BLOC
@@ -907,6 +909,8 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
         }
 
     }
+
+    
 }
 
 int MetisMesh::ReturnLocalNode(int globalNode, int localBlock, std::vector<int>* global2LocalNodes) {
@@ -914,7 +918,7 @@ int MetisMesh::ReturnLocalNode(int globalNode, int localBlock, std::vector<int>*
     int localNode = 0;
     int i = 1;
     int index = global2LocalNodes[globalNode][i];
-    cout << "Looking for value " << endl;
+    
     while (index != localBlock) {
         i = i + 2;
         index = global2LocalNodes[globalNode][i];
