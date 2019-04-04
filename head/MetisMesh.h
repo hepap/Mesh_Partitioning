@@ -61,6 +61,7 @@ public:
     MetisMesh* Partition(int nPart);
     void SetConnectivity(std::vector<int>** connectivity_);
     int NumberOfNodes(int elementType);
+
     int ReturnLocalNode(int globalNode, int localBlock, std::vector<int>* getGlobal2LocalNodes);
     int* getElementBlock_();
     int* getNNodes_();

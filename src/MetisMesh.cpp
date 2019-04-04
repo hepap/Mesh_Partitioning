@@ -493,9 +493,12 @@ void MetisMesh::WriteMesh(std::string fileName)
         std::cout << " ----- Ajout des frontieres pour le block " << blockI << endl;
 
         fprintf(fid, "NMARK= %d\n", metisBoundary_->nBoundaries_);
+        std::cout << "Nombre de frontieres = " << metisBoundary_->nBoundaries_ << endl;
 
         for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++) {
+
             int markerElems = (*localBoundary_)[make_pair(boundaryI, blockI)].size();
+            std::cout << "markerElems " << markerElems << endl;
 
             fprintf(fid, "MARKER_TAG= %s\n", metisBoundary_->boundaryNames_[boundaryI].c_str());
             fprintf(fid, "MARKER_ELEMS= %d\n", markerElems);
@@ -504,7 +507,18 @@ void MetisMesh::WriteMesh(std::string fileName)
 
                 
                 int NELEM = (*localBoundary_)[make_pair(boundaryI, blockI)][elementI].size();
+                int su2Id;
 
+                switch(NELEM) {
+                    case 4 : su2Id = 9;
+                        break;
+                    case 3 : su2Id = 5;
+                        break;
+                    case 2 : su2Id = 2;
+                        break;
+                }
+
+                fprintf(fid, "%d ", su2Id);
                 for (int nodeI = 0; nodeI < NELEM; nodeI ++) {
                     fprintf(fid, "%d ", (*localBoundary_)[make_pair(boundaryI, blockI)][elementI][nodeI]);
                    // std::cout << (*localBoundary_)[make_pair(boundaryI, blockI)][elementI][nodeI] << " ";
@@ -516,10 +530,6 @@ void MetisMesh::WriteMesh(std::string fileName)
         
         }
 
-
-
-
-
         fclose(fid);
         std::cout << name << " output file closed ..." << endl;
     }
@@ -528,6 +538,10 @@ void MetisMesh::WriteMesh(std::string fileName)
     // store name in attribute so we can print them later in topology gile
     filesName_ = filesName;
 }
+
+
+
+
 
 int MetisMesh::NumberOfNodes(int elementType)
 {
@@ -548,7 +562,7 @@ int MetisMesh::NumberOfNodes(int elementType)
         numberOfNodes = 3;
     }
 
-    // Quadrlateral
+    // Quadrilateral
     else if (elementType == 9)
     {
 
@@ -705,20 +719,6 @@ MetisMesh* MetisMesh::Partition(int nPart)
             }
         }
 
-        // int newConnectivity_node_size = addedNode[blockI].size();
-
-        /*==============HELENE=================*/
-         // newConnectivity_node[blockI] = new std::vector<int>[newConnectivity_node_size];
-         // for (int i = 0; i < newNelements[blockI]; i++)
-         // {
-         //     for (int j = 0; j < elementNbrNodesPerBlock[blockI][i]; j++)
-         //     {
-         //
-         //     }
-         // }
-
-        /*=====================================*/
-
     }
     std::cout << "new connectivity done" << endl;
     int newNnodes[nPart];
@@ -853,31 +853,26 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
    // vector <int>** globalNode2LocalNodes = this->getGlobal2LocalNodes_();
 
     std::cout << "ALLLLOOO " << endl;
-    std::vector<int> **newBoundaryConnectivity;
-    newBoundaryConnectivity = new std::vector<int> *[nBlock_];
+    //std::vector<int> **newBoundaryElementType;
+    //newBoundaryElementType = new std::vector<int> *[nBlock_];
     std::vector<int> node1;
     std::vector<int> node2;
-    
     int commonGlobalElement;
-
-
     std::map<pair<int, int>, vector<vector<int>>>* localBoundary = new map<pair<int, int>, vector<vector<int>>>;
-
 
     for (int boundaryI = 0; boundaryI < metisBoundary->nBoundaries_; boundaryI++)
     {
 
         std::vector<int> face2Block;
-        std::cout << "------ " << boundaryI << " ------" << endl;
         int boundaryElementNbr = metisBoundary->boundaryNelements_[boundaryI];
         
-        newBoundaryConnectivity[boundaryI] = new std::vector<int> [boundaryElementNbr];
+        //newBoundaryElementType[boundaryI] = new std::vector<int> [boundaryElementNbr];
         // Map <BoundaryIndex, BlockNumber> to a vector<vector<int>>
         
         // accede a chacun des faces de la frontiere
         for (int i = 0; i < boundaryElementNbr; i++)
         {
-            std::cout << " ----------- frontiere ---------- " << i << endl;
+            
             int sizeBoundary = metisBoundary->boundaryElementNbrNodes_[boundaryI][i];
             int firstNode = metisBoundary->boundaryConnectivity_[boundaryI][i][0];
             node1 = globalNode2GlobalCells[0][firstNode];
@@ -921,40 +916,20 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
           
             int localBlock = face2Block[i];
             vector<int> localBoundaryElement;
-           
-
-            std::cout << "element frontiere " << i << " dans le block " << face2Block[i] << endl;
-            
+         
             for (int k = 0; k < sizeBoundary; k++)
             {
                 
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][k];
-                std::cout << "globalNode " << globalNode << " = ";
-                
-                for (int f = 0; f < global2LocalNodes[globalNode].size(); f++) {
-                    std::cout << global2LocalNodes[globalNode][f] << " ";
-                }
-                std::cout << endl;    
-                // std::cout << "globalNode " << globalNode << endl;
-                // std::cout << "localBlock = " << localBlock << endl;
+  
                 int localNode = ReturnLocalNode(globalNode, localBlock, global2LocalNodes);
-                std::cout << "globalNode " << globalNode << " = localNode : " << localNode << endl;
                 localBoundaryElement.push_back(localNode);
                 
             }
             
-            
-            //cout <<  "boundaryI = " << boundaryI << " localBlock = " << localBlock << endl;
-            (*localBoundary)[make_pair(boundaryI, localBlock)].push_back(localBoundaryElement);
-            
-            // for (int g = 0; g < localBoundaryElement.size(); g++) {
-
-            //     cout << (*localBoundary)[make_pair(boundaryI, localBlock)][0][g] << endl;
-            //     //cout << "localBoundaryElement[g]" << localBoundaryElement[g] << endl;
-            // }
-               
+            (*localBoundary)[make_pair(boundaryI, localBlock)].push_back(localBoundaryElement);    
         }
-       
+  
     }
 
     // Allocate as attribute
