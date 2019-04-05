@@ -8,7 +8,7 @@ using namespace std;
 enum BoundaryType {
     WALL = 0,
     FAR_FIELD = 1,
-    CONNECT = 2
+    SYM = 2
 };
 
 class MetisBoundary
