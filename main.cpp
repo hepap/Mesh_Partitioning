@@ -172,11 +172,11 @@ std::cout << reconstruct_faces.commonFacesVector_[0].size() << '\n';
 for(int i = 0; i<n_connexions;i++)
 {
 	std::cout<<"CONN = "<<i<<" blocks "<< reconstruct_faces.connexionVector_[i][0]<<" "<<reconstruct_faces.connexionVector_[i][1]<<std::endl;
-
 	for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
 	{
-		std::cout<<"IN \n";
+		std::cout<<j<<"\t"  << reconstruct_faces.commonCellsVector_[i].size()<<endl;
 		int globalcell0 = reconstruct_faces.commonCellsVector_[i][j][0];
+		std::cout<<"GlobalCell = "<< globalcell0<<endl;
 		int cell0 = global2LocalElements[globalcell0][0];
 		int cellblock0 = global2LocalElements[globalcell0][1];
 		cell_flag[cellblock0][cell0] = 2;
@@ -184,14 +184,14 @@ for(int i = 0; i<n_connexions;i++)
 		int cell1 = global2LocalElements[globalcell1][0];
 		int cellblock1 = global2LocalElements[globalcell1][1];
 		cell_flag[cellblock1][cell1] = 2;
-	/* 	cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
+		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
 		cout<<cellblock0<<"\t";
 		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
-		cout<<cellblock1<<"\t"; */
+		cout<<cellblock1<<"\t";
 
 		for(int k = 0; k<reconstruct_faces.commonFacesVector_[i][j].size();k++)
 		{
-			//cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
+			cout<<reconstruct_faces.commonFacesVector_[i][j][k]<<"\t";
 			int global_node = reconstruct_faces.commonFacesVector_[i][j][k];
 			if(global2LocalNodes[global_node].size()==4)
 			{
@@ -249,7 +249,7 @@ for(int i = 0; i<n_connexions;i++)
 
 			}
 		}
-		//std::cout << endl;
+		std::cout << endl;
 
 	}
 

@@ -79,9 +79,9 @@ MetisMesh::MetisMesh()
     : nElements_(nullptr), nNodes_(nullptr), elementNbrNodes_(nullptr), elementType_(nullptr),
      local2GlobalElements_(nullptr),local2GlobalNodes_(nullptr),global2LocalNodes_(nullptr),
      node2Cells_(nullptr), cell2GlobalNodes_(nullptr), nTotalNode_(0), nBlock_(0),
-     x_(nullptr), y_(nullptr), z_(nullptr), connectivity_(nullptr), elementBlock_(nullptr), 
+     x_(nullptr), y_(nullptr), z_(nullptr), connectivity_(nullptr), elementBlock_(nullptr),
      localBoundary_()
-   
+
 
 
 {
@@ -489,10 +489,10 @@ void MetisMesh::WriteMesh(std::string fileName)
         {
             fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
         }
-    
 
 
-        
+
+
         // Ajoute des frontiere physique
         std::cout << " ----- Ajout des frontieres pour le block " << blockI << endl;
 
@@ -509,7 +509,7 @@ void MetisMesh::WriteMesh(std::string fileName)
 
             for (int elementI = 0; elementI < markerElems; elementI++) {
 
-                
+
                 int NELEM = (*localBoundary_)[make_pair(boundaryI, blockI)][elementI].size();
                 int su2Id;
 
@@ -528,10 +528,10 @@ void MetisMesh::WriteMesh(std::string fileName)
                    // std::cout << (*localBoundary_)[make_pair(boundaryI, blockI)][elementI][nodeI] << " ";
                 }
 
-                //std::cout << endl; 
+                //std::cout << endl;
                 fprintf(fid, "\n");
             }
-        
+
         }
 
         fclose(fid);
@@ -654,11 +654,14 @@ MetisMesh* MetisMesh::Partition(int nPart)
     std::cout << "Partition Success: " << success << std::endl;
 
 
-    for(int i=0;i<32;i++)
-    {
-      epart[i] = 0;
-      epart[i+32] = 1;
-    }
+    // for(int i=0;i<16;i++)
+    // {
+    //   epart[i] = 0;
+    //   epart[i+16] = 1;
+    //   epart[i+32] = 2;
+    //   epart[i+48] = 3;
+    //
+    // }
 
 
     std::vector<int> elementsPerBlock[nPart];
@@ -904,14 +907,14 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
 
         std::vector<int> face2Block;
         int boundaryElementNbr = metisBoundary->boundaryNelements_[boundaryI];
-        
+
         //newBoundaryElementType[boundaryI] = new std::vector<int> [boundaryElementNbr];
         // Map <BoundaryIndex, BlockNumber> to a vector<vector<int>>
-        
+
         // accede a chacun des faces de la frontiere
         for (int i = 0; i < boundaryElementNbr; i++)
         {
-            
+
             int sizeBoundary = metisBoundary->boundaryElementNbrNodes_[boundaryI][i];
             int firstNode = metisBoundary->boundaryConnectivity_[boundaryI][i][0];
             node1 = globalNode2GlobalCells[0][firstNode];
@@ -951,24 +954,24 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
                 }
                 //std::cout << "La face a la frontiere " << i << "appartient au block " << face2Block[i] << endl;
             }
-            
-          
+
+
             int localBlock = face2Block[i];
             vector<int> localBoundaryElement;
-         
+
             for (int k = 0; k < sizeBoundary; k++)
             {
-                
+
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][k];
-  
+
                 int localNode = ReturnLocalNode(globalNode, localBlock, global2LocalNodes);
                 localBoundaryElement.push_back(localNode);
-                
+
             }
-            
-            (*localBoundary)[make_pair(boundaryI, localBlock)].push_back(localBoundaryElement);    
+
+            (*localBoundary)[make_pair(boundaryI, localBlock)].push_back(localBoundaryElement);
         }
-  
+
     }
 
     // Allocate as attribute
@@ -980,7 +983,7 @@ int MetisMesh::ReturnLocalNode(int globalNode, int localBlock, std::vector<int>*
     int localNode = 0;
     int i = 1;
     int index = global2LocalNodes[globalNode][i];
-    
+
     while (index != localBlock) {
         i = i + 2;
         index = global2LocalNodes[globalNode][i];
