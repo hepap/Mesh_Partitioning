@@ -18,9 +18,13 @@ int* MetisMesh::getNElements_()
 {
   return nElements_;
 }
-int** MetisMesh::getLocal2GlobalNodes_()
+int** MetisMesh::getlocal2GlobalNodes_()
 {
   return local2GlobalNodes_;
+}
+int** MetisMesh::getlocal2GlobalElements_()
+{
+  return local2GlobalElements_;
 }
 std::vector<int>* MetisMesh::getGlobal2LocalNodes_()
 {
@@ -599,6 +603,14 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     std::cout << "Partition Success: " << success << std::endl;
 
+
+    for(int i=0;i<32;i++)
+    {
+      epart[i] = 0;
+      epart[i+32] = 1;
+    }
+
+
     std::vector<int> elementsPerBlock[nPart];
     std::vector<int> elementNbrNodesPerBlock[nPart];
 
@@ -610,6 +622,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
         elementBlock_[i] = epart[i];
         //std::cout << "element" << i << " = " << elementBlock_[i] << endl;
         int blockId = epart[i];
+
         elementsPerBlock[blockId].push_back(i);
         elementNbrNodesPerBlock[blockId].push_back(elementNbrNodes_[i]);
     }
@@ -644,10 +657,12 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     std::cout << "nPart = " << nPart << endl;
 
-    #pragma omp parallel for num_threads(4)
+    // #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
         newConnectivity[blockI] = new std::vector<int>[newNelements[blockI]];
+
+
         std::cout << "building newConnectivity " << blockI << endl;
         std::cout << newNelements[blockI] << endl;
 
@@ -666,6 +681,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
                 int n1 = connectivity_[0][elementIblockI][j];
                 int newN1 = findNodeIndex(addedNode[blockI], n1);
                 newConnectivity[blockI][i][j] = newN1-1;
+
             }
         }
 
@@ -689,7 +705,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
     /*==============HELENE=================*/
     int nodeCount4Global2LocalNodes = 0;
     /*=====================================*/
-    #pragma omp parallel for num_threads(4)
+    // #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
         newNnodes[blockI] = addedNode[blockI].size();
@@ -706,10 +722,31 @@ MetisMesh* MetisMesh::Partition(int nPart)
     newMesh->SetConnectivity(newConnectivity);
 
     std::cout << "newMesh ok" << endl;
+    newMesh->node2Cells_ = new std::vector<int> *[nPart];
+
+    for (int blockI = 0; blockI < nPart; blockI++)
+    {
+      newMesh->node2Cells_[blockI] = new std::vector<int>[newMesh->nNodes_[blockI]];
+      for (int elementI = 0; elementI < newMesh->nElements_[blockI]; elementI++)
+      {
+        for(int nodeI=0; nodeI < newMesh->connectivity_[blockI][elementI].size();nodeI++)
+        {
+          int node = newMesh->connectivity_[blockI][elementI][nodeI];
+
+          newMesh->node2Cells_[blockI][node].push_back(elementI);
+        }
+      }
+
+    }
+
+
+
+
+
 
     newMesh->global2LocalElements_ = new std::vector<int>[nElements_[0]];
 
-    #pragma omp parallel for num_threads(4)
+    // #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
         newNelements[blockI] = elementsPerBlock[blockI].size();
@@ -736,7 +773,6 @@ MetisMesh* MetisMesh::Partition(int nPart)
     /*=====================================*/
 
     std::cout << "local and global" << endl;
-    #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
 
@@ -761,6 +797,9 @@ MetisMesh* MetisMesh::Partition(int nPart)
             /*=====================================*/
         }
     }
+
+
+
 
 
     std::cout << "addedNode ok" << endl;

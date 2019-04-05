@@ -65,7 +65,8 @@ public:
     int* getElementBlock_();
     int* getNNodes_();
     int* getNElements_();
-    int** getLocal2GlobalNodes_();
+    int** getlocal2GlobalNodes_();
+    int** getlocal2GlobalElements_();
     std::vector<int>* getGlobal2LocalNodes_();
     std::vector<int>* getGlobal2LocalElements_();
     std::vector<int>** getConnectivity_();

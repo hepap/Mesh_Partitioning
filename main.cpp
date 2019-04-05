@@ -79,7 +79,7 @@ MetisMesh* newMesh = reader.Partition(nPart);
 ReconstructFaces reconstruct_faces = ReconstructFaces(n_blocks, global_n_elements[0]);
 std::vector<int> common_nodes_vector;
 
-int** node_array = newMesh ->getLocal2GlobalNodes_();
+int** node_array = newMesh ->getlocal2GlobalNodes_();
 int* n_nodes_in_block = newMesh ->getNNodes_();
 int* n_elements_in_block = newMesh ->getNElements_();
 
@@ -97,7 +97,7 @@ for(int k=0; k<n_blocks; k++)
 	}
 }
 
-
+std::cout<<"boop \n";
 
 // std::vector<std::vector<int>> connexionVector = reconstruct_faces.connexionVector_;
 // cout<<connexionVector.size()<<endl;
@@ -112,12 +112,34 @@ for(int k=0; k<n_blocks; k++)
 
 std::vector<int>** globalCell2GlobalNodes = reader.getConnectivity_();
 std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
-int* elementBlock = reader.getElementBlock_();
-reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 
-cout<<"out of my face hehe"<<endl;
-std::vector<std::vector<int>>* face2nodes = reconstruct_faces.commonFacesVector_;
-cout<<"Is this happening?!"<<endl;
+int* nNodeglobal = reader.getNNodes_();
+
+for(int i=0;i<nNodeglobal[0];i++)
+{
+	std::cout<<"NODE = "<<i<<std::endl;
+	for(int j=0;j<globalNode2GlobalCells[0][i].size();j++)
+	{
+		std::cout<<globalNode2GlobalCells[0][i][j]<<"\t";
+	}
+	std::cout << '\n';
+}
+
+int* elementBlock = reader.getElementBlock_();
+
+std::vector<int>** cell_2_nodes_connectivity = newMesh->getConnectivity_();
+std::vector<int>** node_2_cells_connectivity = newMesh->getNode2Cells_();
+int** local_2_global_nodes = newMesh->getlocal2GlobalNodes_();
+int** local_2_global_elements = newMesh->getlocal2GlobalElements_();
+
+reconstruct_faces.FindBoundaryFaces(n_elements_in_block ,cell_2_nodes_connectivity,node_2_cells_connectivity);
+reconstruct_faces.FindConnexionFaces(local_2_global_nodes, local_2_global_elements,globalNode2GlobalCells);
+
+// reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
+//
+// cout<<"out of my face hehe"<<endl;
+// std::vector<std::vector<int>>* face2nodes = reconstruct_faces.commonFacesVector_;
+// cout<<"Is this happening?!"<<endl;
 // cout<<face2nodes[0].size()<<endl;
 // for(int i= 0;i<face2nodes[0].size();i++)
 // {
@@ -142,11 +164,16 @@ for(int i=0;i<n_blocks;i++)
 }
 
 int n_connexions = reconstruct_faces.connexionVector_.size();
+
+std::cout << reconstruct_faces.commonFacesVector_[0].size() << '\n';
 //
 for(int i = 0; i<n_connexions;i++)
 {
+	std::cout<<"CONN = "<<i<<" blocks "<< reconstruct_faces.connexionVector_[i][0]<<" "<<reconstruct_faces.connexionVector_[i][1]<<std::endl;
+
 	for(int j = 0; j<reconstruct_faces.commonFacesVector_[i].size();j++)
 	{
+		std::cout<<"IN \n";
 		int globalcell0 = reconstruct_faces.commonCellsVector_[i][j][0];
 		int cell0 = global2LocalElements[globalcell0][0];
 		int cellblock0 = global2LocalElements[globalcell0][1];
@@ -245,6 +272,6 @@ newMesh->WriteMesh(outputMeshFile);
 
 // ===== Isabelle =====
 newMesh->WriteOutputTecplot("outputMeshFile.dat",node_flag,cell_flag);
-newMesh->WriteTopology(outputTopology, &reconstruct_faces);
+// newMesh->WriteTopology(outputTopology, &reconstruct_faces);
 
 }
