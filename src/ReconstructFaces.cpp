@@ -325,13 +325,13 @@ std::vector<std::vector<int>> ReconstructFaces::CreateFaces(std::vector<int> cel
 
 void ReconstructFaces::FindBoundaryFaces(int* nElements,std::vector<int>** cell_2_nodes_connectivity,std::vector<int>** node_2_cells_connectivity)
 {
-	std::cout<<"In FindBoundaryFaces"<<std::endl;
+	// std::cout<<"In FindBoundaryFaces"<<std::endl;
 	boundaryFaces_ = new std::vector<std::vector<int>>[n_blocks_];
 	boundaryElements_ = new std::vector<int>[n_blocks_];
 
 	for(int blockI = 0; blockI<n_blocks_;blockI++)
 	{
-		std::cout<<"======================================================="<<std::endl;
+		// std::cout<<"======================================================="<<std::endl;
 
 		for(int cellI = 0; cellI<nElements[blockI];cellI++)
 		{
@@ -355,7 +355,7 @@ void ReconstructFaces::FindBoundaryFaces(int* nElements,std::vector<int>** cell_
 				std::vector<int>::iterator first_it;
 				std::vector<int> first_cells_intersection(node_2_cells_connectivity_node0.size()+node_2_cells_connectivity_node1.size());
 
-				first_it = std::set_intersection( node_2_cells_connectivity_node0.begin(), node_2_cells_connectivity_node0.end(), node_2_cells_connectivity_node0.begin(), node_2_cells_connectivity_node0.end(), first_cells_intersection.begin() );
+				first_it = std::set_intersection( node_2_cells_connectivity_node0.begin(), node_2_cells_connectivity_node0.end(), node_2_cells_connectivity_node1.begin(), node_2_cells_connectivity_node1.end(), first_cells_intersection.begin() );
 				first_cells_intersection.resize(first_it-first_cells_intersection.begin());
 
 				if(first_cells_intersection.size()!=0)
@@ -368,10 +368,10 @@ void ReconstructFaces::FindBoundaryFaces(int* nElements,std::vector<int>** cell_
 
 					if(second_cells_intersection.size()==1)
 					{
-						std::cout<<"Frontiere "<<second_cells_intersection[0]<<std::endl;
+						// std::cout<<"Frontiere "<<second_cells_intersection[0]<<std::endl;
 						boundaryFaces_[blockI].push_back(faces[faceI]);
 						boundaryElements_[blockI].push_back(second_cells_intersection[0]);
-						std::cout<<faces[faceI][0]<<"\t"<<faces[faceI][1]<<"\t"<<faces[faceI][2]<<"\t"<<faces[faceI][3]<<std::endl;
+						// std::cout<<faces[faceI][0]<<"\t"<<faces[faceI][1]<<"\t"<<faces[faceI][2]<<"\t"<<faces[faceI][3]<<std::endl;
 
 
 					}
@@ -395,10 +395,10 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, std::vecto
 	for(int connexionI =0; connexionI < int(connexionVector_.size()); connexionI++)
 	{
 
-		std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
+		// std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
 
 		int count =0;
-		std::cout << connexionI << '\n';
+		// std::cout << connexionI << '\n';
 		int first_block_id = connexionVector_[connexionI][0];
 		int second_block_id = connexionVector_[connexionI][1];
 
@@ -425,6 +425,8 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, std::vecto
 
 			std::vector<int> face_2_nodes_connectivity_non_sorted= face_2_nodes_connectivity;
 			std::sort(face_2_nodes_connectivity.begin(),face_2_nodes_connectivity.end());
+			std::sort(common_nodes_vector.begin(),common_nodes_vector.end());
+
 			std::vector<int>::iterator it;
 			std::vector<int> face_intersection(face_2_nodes_connectivity.size()+common_nodes_vector.size());
 
@@ -435,11 +437,11 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, std::vecto
 			{
 				common_faces_vector_temp[connexionI].push_back(face_2_nodes_connectivity_non_sorted);
 				// commonCellsVector_[connexionI].push_back(local_2_global_elements[blockI][cell_local]);
-				std::cout<<boundaryFaces_[blockI][faceI][0]<<"\t"<<boundaryFaces_[blockI][faceI][1]<<"\t"<<boundaryFaces_[blockI][faceI][2]<<"\t"<<boundaryFaces_[blockI][faceI][3]<<std::endl;
-				
-				std::cout<<face_2_nodes_connectivity[0]<<"\t"<<face_2_nodes_connectivity[1]<<"\t"<<face_2_nodes_connectivity[2]<<"\t"<<face_2_nodes_connectivity[3]<<std::endl;
+				// std::cout<<boundaryFaces_[blockI][faceI][0]<<"\t"<<boundaryFaces_[blockI][faceI][1]<<"\t"<<boundaryFaces_[blockI][faceI][2]<<"\t"<<boundaryFaces_[blockI][faceI][3]<<std::endl;
 
-				std::cout << "======================"<<common_faces_vector_temp[connexionI].size()<<"========================" << '\n';
+				// std::cout<<face_2_nodes_connectivity[0]<<"\t"<<face_2_nodes_connectivity[1]<<"\t"<<face_2_nodes_connectivity[2]<<"\t"<<face_2_nodes_connectivity[3]<<std::endl;
+
+				// std::cout << "======================"<<common_faces_vector_temp[connexionI].size()<<"========================" << '\n';
 
 			}
 		}
@@ -483,9 +485,9 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, std::vecto
 
 					if((block_cell0==first_block_id || block_cell0 == second_block_id)&&(block_cell1==first_block_id || block_cell1 == second_block_id))
 					{
-						std::cout<<"ok \n";
+						// std::cout<<"ok \n";
 						commonFacesVector_[connexionI].push_back(common_faces_vector_temp[connexionI][faceI]);
-						commonCellsVector_[connexionI].push_back({cell0,cell1});			
+						commonCellsVector_[connexionI].push_back({cell0,cell1});
 					}
 
 
@@ -498,6 +500,7 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, std::vecto
 
 void ReconstructFaces::RemovePhysicalBoundaries(int** local_2_global_nodes, MetisBoundary* single_block_metisboundary)
 {
+
 
 	for(int blockI =0;blockI<n_blocks_;blockI++)
 	{
@@ -516,16 +519,16 @@ void ReconstructFaces::RemovePhysicalBoundaries(int** local_2_global_nodes, Meti
 			std::vector<int> face_2_nodes_connectivity_global_non_sorted = face_2_nodes_connectivity_global;
 
 			std::sort(face_2_nodes_connectivity_global.begin(),face_2_nodes_connectivity_global.end());
-			
+
 			bool found_face =false;
 
 			for(int boundaryI = 0; boundaryI < single_block_metisboundary->nBoundaries_;boundaryI++)
 			{
 				for(int boundary_faceI =0; boundary_faceI < single_block_metisboundary->boundaryNelements_[boundaryI]; boundary_faceI++)
 				{
-					std::cout<<"n_elements_in_boundary = "<<single_block_metisboundary->boundaryNelements_[boundaryI]<<std::endl;
+					// std::cout<<"n_elements_in_boundary = "<<single_block_metisboundary->boundaryNelements_[boundaryI]<<std::endl;
 
-					std::cout<<"boundary_faceI = "<<boundary_faceI<<std::endl;
+					// std::cout<<"boundary_faceI = "<<boundary_faceI<<std::endl;
 
 					std::vector<int> boundary_face_2_nodes_connectivity = single_block_metisboundary->boundaryConnectivity_[boundaryI][boundary_faceI];
 
@@ -539,6 +542,7 @@ void ReconstructFaces::RemovePhysicalBoundaries(int** local_2_global_nodes, Meti
 					if(faces_intersection.size()>=3)
 					{
 						boundaryFaces_[blockI][faceI].clear();
+						boundaryElements_[blockI][faceI]=0;
 						found_face = true;
 						break;
 					}
@@ -552,4 +556,3 @@ void ReconstructFaces::RemovePhysicalBoundaries(int** local_2_global_nodes, Meti
 		}
 	}
 }
-

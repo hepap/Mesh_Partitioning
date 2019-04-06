@@ -57,7 +57,7 @@ public:
 
     void Init(int nBlock, int* nElements, int* nNodes);
     void ReadSingleBlockMesh(std::string fileName);
-    void WriteMesh(std::string fileName);
+    void WriteMesh(std::string fileName, ReconstructFaces* reconstruct_faces);
     MetisMesh* Partition(int nPart);
     void SetConnectivity(std::vector<int>** connectivity_);
     int NumberOfNodes(int elementType);

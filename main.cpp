@@ -117,15 +117,15 @@ std::vector<int>** globalNode2GlobalCells = reader.getNode2Cells_();
 
 int* nNodeglobal = reader.getNNodes_();
 
-for(int i=0;i<nNodeglobal[0];i++)
-{
-	std::cout<<"NODE = "<<i<<std::endl;
-	for(int j=0;j<globalNode2GlobalCells[0][i].size();j++)
-	{
-		std::cout<<globalNode2GlobalCells[0][i][j]<<"\t";
-	}
-	std::cout << '\n';
-}
+// for(int i=0;i<nNodeglobal[0];i++)
+// {
+// 	std::cout<<"NODE = "<<i<<std::endl;
+// 	for(int j=0;j<globalNode2GlobalCells[0][i].size();j++)
+// 	{
+// 		std::cout<<globalNode2GlobalCells[0][i][j]<<"\t";
+// 	}
+// 	std::cout << '\n';
+// }
 
 int* elementBlock = reader.getElementBlock_();
 
@@ -181,11 +181,11 @@ for(int i = 0; i<n_connexions;i++)
 		std::cout<<"GlobalCell = "<< globalcell0<<endl;
 		int cell0 = global2LocalElements[globalcell0][0];
 		int cellblock0 = global2LocalElements[globalcell0][1];
-		cell_flag[cellblock0][cell0] = 2;
+		cell_flag[cellblock0][cell0] += 2;
 		int globalcell1 = reconstruct_faces.commonCellsVector_[i][j][1];
 		int cell1 = global2LocalElements[globalcell1][0];
 		int cellblock1 = global2LocalElements[globalcell1][1];
-		cell_flag[cellblock1][cell1] = 2;
+		cell_flag[cellblock1][cell1] += 2;
 		cout<<reconstruct_faces.commonCellsVector_[i][j][0]<<"\t";
 		cout<<cellblock0<<"\t";
 		cout<<reconstruct_faces.commonCellsVector_[i][j][1]<<"\t";
@@ -265,12 +265,13 @@ MetisBoundary* metisBoundary = reader.GetMetisBoundary_();
 cout << "ComputeBoundaries " << endl;
 
 newMesh->ComputePhysicalBoundaries(metisBoundary, globalNode2GlobalCells, global2LocalNodes);
+
 // ====================
 
-newMesh->WriteMesh(outputMeshFile);
+newMesh->WriteMesh(outputMeshFile, &reconstruct_faces);
 
 // ===== Isabelle =====
 newMesh->WriteOutputTecplot("outputMeshFile.dat",node_flag,cell_flag);
-// newMesh->WriteTopology(outputTopology, &reconstruct_faces);
+newMesh->WriteTopology(outputTopology, &reconstruct_faces);
 
 }
