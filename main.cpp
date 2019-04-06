@@ -133,9 +133,12 @@ std::vector<int>** cell_2_nodes_connectivity = newMesh->getConnectivity_();
 std::vector<int>** node_2_cells_connectivity = newMesh->getNode2Cells_();
 int** local_2_global_nodes = newMesh->getlocal2GlobalNodes_();
 int** local_2_global_elements = newMesh->getlocal2GlobalElements_();
+std::vector<int>* global2LocalElements =newMesh->getGlobal2LocalElements_();
+MetisBoundary* single_block_metisboundary = reader.GetMetisBoundary_();
 
 reconstruct_faces.FindBoundaryFaces(n_elements_in_block ,cell_2_nodes_connectivity,node_2_cells_connectivity);
-reconstruct_faces.FindConnexionFaces(local_2_global_nodes, local_2_global_elements,globalNode2GlobalCells);
+reconstruct_faces.RemovePhysicalBoundaries(local_2_global_nodes,single_block_metisboundary );
+reconstruct_faces.FindConnexionFaces(local_2_global_nodes, global2LocalElements,globalNode2GlobalCells);
 
 // reconstruct_faces.FindElementsInConnexion(globalCell2GlobalNodes,globalNode2GlobalCells);
 //
@@ -156,7 +159,6 @@ int** node_flag = new int*[n_blocks];
 int** cell_flag = new int*[n_blocks];
 
 std::vector<int>* global2LocalNodes =newMesh->getGlobal2LocalNodes_();
-std::vector<int>* global2LocalElements =newMesh->getGlobal2LocalElements_();
 
 
 for(int i=0;i<n_blocks;i++)

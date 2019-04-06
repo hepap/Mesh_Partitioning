@@ -4,6 +4,8 @@
 #include <iostream>     // std::cout
 #include <algorithm>    // std::set_intersection, std::sort
 #include <vector>
+#include "MetisBoundary.h"
+
 
 class ReconstructFaces
 {
@@ -27,7 +29,9 @@ public:
 	void FindElementsInConnexion(std::vector<int>** global_cells_vector, std::vector<int>** global_nodes_vector);
 	std::vector<std::vector<int>> CreateFaces(std::vector<int> cell2NodesConnectivity);
 	void FindBoundaryFaces(int* nElements,std::vector<int>** cell_2_nodes_connectivity,std::vector<int>** node_2_cells_connectivity);
-	void FindConnexionFaces(int** local_2_global_nodes,int** local_2_global_elements,std::vector<int>** global_node_2_cells_connectivity);
+	void FindConnexionFaces(int** local_2_global_nodes,std::vector<int>* global_2_local_elements,std::vector<int>** global_node_2_cells_connectivity);
+	void RemovePhysicalBoundaries(int** local_2_global_nodes, MetisBoundary* single_block_metisboundary);
+
 };
 
 #endif

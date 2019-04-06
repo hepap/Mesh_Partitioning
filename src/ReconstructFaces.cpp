@@ -386,12 +386,15 @@ void ReconstructFaces::FindBoundaryFaces(int* nElements,std::vector<int>** cell_
 	}
 }
 
-void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, int** local_2_global_elements,std::vector<int>** global_node_2_cells_connectivity)
+void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, std::vector<int>* global_2_local_elements,std::vector<int>** global_node_2_cells_connectivity)
 {
 	commonFacesVector_ = new std::vector<std::vector<int>>[connexionVector_.size()];
+	std::vector<std::vector<int>>* common_faces_vector_temp= new std::vector<std::vector<int>>[connexionVector_.size()];
 	commonCellsVector_ = new std::vector<std::vector<int>>[connexionVector_.size()];
+
 	for(int connexionI =0; connexionI < int(connexionVector_.size()); connexionI++)
 	{
+
 		std::cout << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++" << '\n';
 
 		int count =0;
@@ -404,6 +407,11 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, int** loca
 		int blockI = first_block_id;
 		for(int faceI=0; faceI<boundaryFaces_[blockI].size();faceI++)
 		{
+			if(boundaryFaces_[blockI][faceI].size()==0)
+			{
+				continue;
+			}
+
 			int cell_local = boundaryElements_[blockI][faceI];
 
 			std::vector<int> face_2_nodes_connectivity;
@@ -425,23 +433,23 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, int** loca
 
 			if(face_intersection.size()>=3)
 			{
-				commonFacesVector_[connexionI].push_back(face_2_nodes_connectivity_non_sorted);
+				common_faces_vector_temp[connexionI].push_back(face_2_nodes_connectivity_non_sorted);
 				// commonCellsVector_[connexionI].push_back(local_2_global_elements[blockI][cell_local]);
 				std::cout<<boundaryFaces_[blockI][faceI][0]<<"\t"<<boundaryFaces_[blockI][faceI][1]<<"\t"<<boundaryFaces_[blockI][faceI][2]<<"\t"<<boundaryFaces_[blockI][faceI][3]<<std::endl;
 				
 				std::cout<<face_2_nodes_connectivity[0]<<"\t"<<face_2_nodes_connectivity[1]<<"\t"<<face_2_nodes_connectivity[2]<<"\t"<<face_2_nodes_connectivity[3]<<std::endl;
 
-				std::cout << "======================"<<commonFacesVector_[connexionI].size()<<"========================" << '\n';
+				std::cout << "======================"<<common_faces_vector_temp[connexionI].size()<<"========================" << '\n';
 
 			}
 		}
 
 
-		for(int faceI = 0;faceI<commonFacesVector_[connexionI].size();faceI++)
+		for(int faceI = 0;faceI<common_faces_vector_temp[connexionI].size();faceI++)
 		{
-			int node0 = commonFacesVector_[connexionI][faceI][0];
-			int node1 = commonFacesVector_[connexionI][faceI][1];
-			int node2 = commonFacesVector_[connexionI][faceI][2];
+			int node0 = common_faces_vector_temp[connexionI][faceI][0];
+			int node1 = common_faces_vector_temp[connexionI][faceI][1];
+			int node2 = common_faces_vector_temp[connexionI][faceI][2];
 
 			std::vector<int> node_2_cells_connectivity_node0 = global_node_2_cells_connectivity[0][node0];
 			std::vector<int> node_2_cells_connectivity_node1 = global_node_2_cells_connectivity[0][node1];
@@ -470,7 +478,16 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, int** loca
 					int cell0 = second_cells_intersection[0];
 					int cell1 = second_cells_intersection[1];
 
-					commonCellsVector_[connexionI].push_back({cell0,cell1});
+					int block_cell0 = global_2_local_elements[cell0][1];
+					int block_cell1 = global_2_local_elements[cell1][1];
+
+					if((block_cell0==first_block_id || block_cell0 == second_block_id)&&(block_cell1==first_block_id || block_cell1 == second_block_id))
+					{
+						std::cout<<"ok \n";
+						commonFacesVector_[connexionI].push_back(common_faces_vector_temp[connexionI][faceI]);
+						commonCellsVector_[connexionI].push_back({cell0,cell1});			
+					}
+
 
 				}
 			}
@@ -478,3 +495,61 @@ void ReconstructFaces::FindConnexionFaces(int** local_2_global_nodes, int** loca
 		}
 	}
 }
+
+void ReconstructFaces::RemovePhysicalBoundaries(int** local_2_global_nodes, MetisBoundary* single_block_metisboundary)
+{
+
+	for(int blockI =0;blockI<n_blocks_;blockI++)
+	{
+		for(int faceI =0 ; faceI<boundaryFaces_[blockI].size(); faceI++)
+		{
+			std::vector<int> face_2_nodes_connectivity_local = boundaryFaces_[blockI][faceI];
+
+			std::vector<int> face_2_nodes_connectivity_global;
+
+			for(int nodeI=0;nodeI<boundaryFaces_[blockI][faceI].size();nodeI++)
+			{
+				int local_node = boundaryFaces_[blockI][faceI][nodeI];
+				int global_node = local_2_global_nodes[blockI][local_node];
+				face_2_nodes_connectivity_global.push_back(global_node);
+			}
+			std::vector<int> face_2_nodes_connectivity_global_non_sorted = face_2_nodes_connectivity_global;
+
+			std::sort(face_2_nodes_connectivity_global.begin(),face_2_nodes_connectivity_global.end());
+			
+			bool found_face =false;
+
+			for(int boundaryI = 0; boundaryI < single_block_metisboundary->nBoundaries_;boundaryI++)
+			{
+				for(int boundary_faceI =0; boundary_faceI < single_block_metisboundary->boundaryNelements_[boundaryI]; boundary_faceI++)
+				{
+					std::cout<<"n_elements_in_boundary = "<<single_block_metisboundary->boundaryNelements_[boundaryI]<<std::endl;
+
+					std::cout<<"boundary_faceI = "<<boundary_faceI<<std::endl;
+
+					std::vector<int> boundary_face_2_nodes_connectivity = single_block_metisboundary->boundaryConnectivity_[boundaryI][boundary_faceI];
+
+					std::sort( boundary_face_2_nodes_connectivity.begin(), boundary_face_2_nodes_connectivity .end());
+					std::vector<int>::iterator it;
+					std::vector<int> faces_intersection(boundary_face_2_nodes_connectivity.size()+face_2_nodes_connectivity_global.size());
+
+					it = std::set_intersection(boundary_face_2_nodes_connectivity.begin(), boundary_face_2_nodes_connectivity.end(),face_2_nodes_connectivity_global.begin(), face_2_nodes_connectivity_global.end(),faces_intersection.begin());
+					faces_intersection.resize(it-faces_intersection.begin());
+
+					if(faces_intersection.size()>=3)
+					{
+						boundaryFaces_[blockI][faceI].clear();
+						found_face = true;
+						break;
+					}
+
+				}
+				if(found_face)
+				{
+					break;
+				}
+			}
+		}
+	}
+}
+
