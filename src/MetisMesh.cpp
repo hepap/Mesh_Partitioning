@@ -473,8 +473,7 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
 
         // fprintf(fid, "Block= %d\n", blockI);
         fprintf(fid, "NDIME= %d\n", nDimensions_);
-
-
+        fprintf(fid, "\n");
 
         std::cout << "access connectivity elements block " << blockI << endl;
         fprintf(fid, "NPOIN= %d\n", nNodes);
@@ -482,6 +481,8 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
         {
             fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
         }
+        fprintf(fid, "\n");
+
         fprintf(fid, "NELEM= %d\n", nElements);
 
         for (int elementI = 0; elementI < nElements; elementI++)
@@ -507,6 +508,7 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
 
         // Ajoute des frontiere physique
         std::cout << " ----- Ajout des frontieres pour le block " << blockI << endl;
+        fprintf(fid, "\n");
 
         fprintf(fid, "NMARK= %d\n", metisBoundary_->nBoundaries_+connexion_count);
         std::cout << "Nombre de frontieres = " << metisBoundary_->nBoundaries_ << endl;
