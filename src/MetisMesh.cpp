@@ -1060,6 +1060,16 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
 
         fprintf(fid, "Block= %d\n", blockI );
 
+        int n_ghost_cells=0;
+        for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++)
+        {
+
+            n_ghost_cells += (*localBoundary_)[make_pair(boundaryI, blockI)].size();
+        }
+
+        n_ghost_cells+=nElements_[blockI];
+        fprintf(fid, "NGhost= %d\n", n_ghost_cells );
+
         // Check how many connexions in block
         vector<int> connexions_in_block_idx;
 
