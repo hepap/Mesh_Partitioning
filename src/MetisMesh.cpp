@@ -1068,7 +1068,7 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
         }
 
         n_ghost_cells+=nElements_[blockI];
-        fprintf(fid, "NGhost= %d\n", n_ghost_cells );
+        fprintf(fid, "GhostCount= %d\n", n_ghost_cells );
 
         // Check how many connexions in block
         vector<int> connexions_in_block_idx;
