@@ -514,7 +514,22 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
         std::cout << " ----- Ajout des frontieres pour le block " << blockI << endl;
         fprintf(fid, "\n");
 
-        fprintf(fid, "NMARK= %d\n", metisBoundary_->nBoundaries_+connexion_count);
+        int count_real_boundaries =0;
+
+        for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++)
+        {
+
+            int markerElems = (*localBoundary_)[make_pair(boundaryI, blockI)].size();
+
+            if(markerElems!=0)
+            {
+                count_real_boundaries +=1;
+            }
+        }
+
+
+
+        fprintf(fid, "NMARK= %d\n", count_real_boundaries+connexion_count);
         std::cout << "Nombre de frontieres = " << metisBoundary_->nBoundaries_ << endl;
 
         for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++)
