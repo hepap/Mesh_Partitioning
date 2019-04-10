@@ -721,43 +721,19 @@ MetisMesh* MetisMesh::Partition(int nPart)
         return nullptr;
     }
 
-
-    // for(int i=0;i<16;i++)
-    // {
-    //   epart[i] = 0;
-    //   epart[i+16] = 1;
-    //   epart[i+32] = 2;
-    //   epart[i+48] = 3;
-
-    // }
-
-
     std::vector<int> elementsPerBlock[nPart];
     std::vector<int> elementNbrNodesPerBlock[nPart];
-
 
     int* elementBlock_ = new int[nElements_[0]];
 
     for (int i = 0; i < nElements_[0]; i++)
     {
         elementBlock_[i] = epart[i];
-        //std::cout << "element" << i << " = " << elementBlock_[i] << endl;
         int blockId = epart[i];
 
         elementsPerBlock[blockId].push_back(i);
         elementNbrNodesPerBlock[blockId].push_back(elementNbrNodes_[i]);
     }
-
-
-    /*==============HELENE=================
-    std::vector<int> nodesPerBlock[nPart];
-    for (int i = 0; i < nNodes_[0]; i++)
-    {
-        int blockId = npart[i];
-        nodesPerBlock[blockId].push_back(i);
-        elementNbrNodesPerBlock[blockId].push_back(elementNbrNodes_[i]);
-    }
-    =====================================*/
 
     int newNelements[nPart];
 
@@ -822,6 +798,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
         /*=====================================*/
     }
 
+    std::cout << "new connectivity done" << endl;
     // Creation dune nouvelle instance de Metis Mesh
     MetisMesh *newMesh = new MetisMesh();
     newMesh->Init(nPart, newNelements, newNnodes);
