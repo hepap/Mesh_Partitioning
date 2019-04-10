@@ -452,7 +452,11 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
       {
         if ((reconstruct_faces->connexionVector_[connexionI][0]==blockI)||(reconstruct_faces->connexionVector_[connexionI][1]==blockI))
         {
-          connexion_count +=1;
+          if(reconstruct_faces->commonFacesVector_[connexionI].size()!=0)
+          {
+            connexion_count +=1;
+
+          }
         }
 
       }
@@ -519,8 +523,10 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
             int markerElems = (*localBoundary_)[make_pair(boundaryI, blockI)].size();
             std::cout << "markerElems " << markerElems << endl;
 
-            fprintf(fid, "MARKER_TAG= %s\n", metisBoundary_->boundaryNames_[boundaryI].c_str());
-            fprintf(fid, "MARKER_ELEMS= %d\n", markerElems);
+            if(markerElems!=0)
+            {
+              fprintf(fid, "MARKER_TAG= %s\n", metisBoundary_->boundaryNames_[boundaryI].c_str());
+              fprintf(fid, "MARKER_ELEMS= %d\n", markerElems);
 
             for (int elementI = 0; elementI < markerElems; elementI++) {
 
@@ -546,6 +552,7 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
                 //std::cout << endl;
                 fprintf(fid, "\n");
             }
+          }
 
         }
 
@@ -553,29 +560,32 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
         {
           if ((reconstruct_faces->connexionVector_[connexionI][0]==blockI)||(reconstruct_faces->connexionVector_[connexionI][1]==blockI))
           {
-            fprintf(fid, "MARKER_TAG= CONNEXION\n");
-            fprintf(fid, "MARKER_ELEMS= %d\n", reconstruct_faces->commonFacesVector_[connexionI].size());
-
-            for(int faceI=0;faceI<reconstruct_faces->commonFacesVector_[connexionI].size(); faceI++)
+            if(reconstruct_faces->commonFacesVector_[connexionI].size()!=0)
             {
-              std::vector<int> global_face_2_nodes_connectivity = reconstruct_faces->commonFacesVector_[connexionI][faceI];
-              int face_type =0;
-              if(global_face_2_nodes_connectivity.size()==3)
+              fprintf(fid, "MARKER_TAG= CONNEXION\n");
+              fprintf(fid, "MARKER_ELEMS= %d\n", reconstruct_faces->commonFacesVector_[connexionI].size());
+
+              for(int faceI=0;faceI<reconstruct_faces->commonFacesVector_[connexionI].size(); faceI++)
               {
-                face_type = 5;
+                std::vector<int> global_face_2_nodes_connectivity = reconstruct_faces->commonFacesVector_[connexionI][faceI];
+                int face_type =0;
+                if(global_face_2_nodes_connectivity.size()==3)
+                {
+                  face_type = 5;
+                }
+                else if(global_face_2_nodes_connectivity.size()==4)
+                {
+                  face_type = 9;
+                }
+                fprintf(fid, "%d", face_type);
+                for(int nodeI =0 ; nodeI<global_face_2_nodes_connectivity.size();nodeI++)
+                {
+                  int global_node = global_face_2_nodes_connectivity[nodeI];
+                  int local_node = ReturnLocalNode(global_node, blockI, global2LocalNodes_);
+                  fprintf(fid, " %d", local_node);
+                }
+                fprintf(fid, "\n");
               }
-              else if(global_face_2_nodes_connectivity.size()==4)
-              {
-                face_type = 9;
-              }
-              fprintf(fid, "%d", face_type);
-              for(int nodeI =0 ; nodeI<global_face_2_nodes_connectivity.size();nodeI++)
-              {
-                int global_node = global_face_2_nodes_connectivity[nodeI];
-                int local_node = ReturnLocalNode(global_node, blockI, global2LocalNodes_);
-                fprintf(fid, " %d", local_node);
-              }
-              fprintf(fid, "\n");
             }
           }
 
@@ -1077,7 +1087,10 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
         {
             if ((reconstruct_faces->connexionVector_[j][0]==blockI)||(reconstruct_faces->connexionVector_[j][1]==blockI))
             {
+              if(reconstruct_faces->commonFacesVector_[j].size()!=0)
+              {
                 connexions_in_block_idx.push_back(j);
+              }
             }
         }
 

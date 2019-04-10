@@ -99,7 +99,7 @@ for(int k=0; k<n_blocks; k++)
 	}
 }
 
-std::cout<<"boop \n";
+// std::cout<<"boop \n";
 
 // std::vector<std::vector<int>> connexionVector = reconstruct_faces.connexionVector_;
 // cout<<connexionVector.size()<<endl;
