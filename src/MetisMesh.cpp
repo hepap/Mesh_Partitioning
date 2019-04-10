@@ -59,19 +59,29 @@ int* MetisMesh::getElementBlock_()
 /*=======================================*/
 
 
-int findNodeIndex(std::vector<int> &list, int node2find)
+int findNodeIndex(std::vector<int> &list, int node2find, map<int, int>& cache)
 {
-    int count(list.size());
+    // Recherche l'index dans la map a laide de la clé node2find
 
-    for (int i = 0; i < count; i++)
+    int cachedValue = cache[node2find];
+
+    if (cachedValue != 0)
+    {
+        return cachedValue;
+    }
+
+
+    for (int i = 0; i <list.size(); i++)
     {
         if (node2find == list[i])
         {
+            cache[node2find] = i+1;
             return i+1;
         }
     }
 
     list.push_back(node2find);
+    cache[node2find] = list.size();
     return list.size();
 }
 
@@ -795,13 +805,17 @@ MetisMesh* MetisMesh::Partition(int nPart)
             newConnectivity[blockI][i].resize(vector_size);
         }
 
+        // Creating map
+        map<int, int> posCache;
+
+
         for (int i = 0; i < newNelements[blockI]; i++)
         {
             for (int j = 0; j < elementNbrNodesPerBlock[blockI][i]; j++)
             {
                 int elementIblockI = elementsPerBlock[blockI][i];
                 int n1 = connectivity_[0][elementIblockI][j];
-                int newN1 = findNodeIndex(addedNode[blockI], n1);
+                int newN1 = findNodeIndex(addedNode[blockI], n1, posCache);
                 newConnectivity[blockI][i][j] = newN1-1;
 
             }
