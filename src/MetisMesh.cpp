@@ -628,59 +628,25 @@ void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_fa
 
 int MetisMesh::NumberOfNodes(int elementType)
 {
-
-    int numberOfNodes(0);
-
-    // Line
-    if (elementType == 3)
+    switch (elementType)
     {
-
-        numberOfNodes = 2;
+        case 3 : // Line
+            return 2;
+        case 5 : // Triangle
+            return 3;
+        case 9 : // Quadrilateral
+        case 10 : // Tetrahedral
+            return 4;
+        case 12 : // Kexahedral
+            return 8;
+        case 13 : // Wedge
+            return 6;
+        case 14 : // Pyramid
+            return 5;
+        default :
+            cout << "ElementType not SU2 format defined" << endl;
+            return 0;
     }
-
-    // Triangle
-    else if (elementType == 5)
-    {
-
-        numberOfNodes = 3;
-    }
-
-    // Quadrilateral
-    else if (elementType == 9)
-    {
-
-        numberOfNodes = 4;
-    }
-
-    // Tetrahedral
-    else if (elementType == 10)
-    {
-
-        numberOfNodes = 4;
-    }
-
-    // Hexahedral
-    else if (elementType == 12)
-    {
-
-        numberOfNodes = 8;
-    }
-
-    // Wedge
-    else if (elementType == 13)
-    {
-
-        numberOfNodes = 6;
-    }
-
-    // Pyramid
-    else if (elementType == 14)
-    {
-
-        numberOfNodes = 5;
-    }
-
-    return numberOfNodes;
 }
 
 MetisMesh* MetisMesh::Partition(int nPart)
