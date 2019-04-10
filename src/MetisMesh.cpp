@@ -777,6 +777,9 @@ MetisMesh* MetisMesh::Partition(int nPart)
     /*=====================================*/
 
     std::cout << "nPart = " << nPart << endl;
+    int newNnodes[nPart];
+    int nodeCount4Global2LocalNodes = 0;
+
 
     // #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
@@ -796,7 +799,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
         // Creating map
         map<int, int> posCache;
-
+        std::set<int> addedNodeSet;
 
         for (int i = 0; i < newNelements[blockI]; i++)
         {
@@ -806,23 +809,16 @@ MetisMesh* MetisMesh::Partition(int nPart)
                 int n1 = connectivity_[0][elementIblockI][j];
                 int newN1 = findNodeIndex(addedNode[blockI], n1, posCache);
                 newConnectivity[blockI][i][j] = newN1-1;
-
+                addedNodeSet.insert(newN1 - 1);
             }
         }
+        int addedSize = addedNodeSet.size();
 
-    }
-    std::cout << "new connectivity done" << endl;
-    int newNnodes[nPart];
-    /*==============HELENE=================*/
-    int nodeCount4Global2LocalNodes = 0;
-    /*=====================================*/
-    // #pragma omp parallel for num_threads(4)
-    for (int blockI = 0; blockI < nPart; blockI++)
-    {
-        newNnodes[blockI] = addedNode[blockI].size();
+        newNnodes[blockI] = addedSize;
 
         /*==============HELENE=================*/
-        nodeCount4Global2LocalNodes += newNnodes[blockI];
+        #pragma omp atomic
+        nodeCount4Global2LocalNodes += addedSize;
         /*=====================================*/
     }
 
