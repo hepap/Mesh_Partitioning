@@ -696,7 +696,28 @@ MetisMesh* MetisMesh::Partition(int nPart)
                                      &ncommon, &nPart, NULL, NULL, &objval,
                                      &epart[0], &npart[0]);
 
+
+    if ( success == METIS_OK ) 
+    {
     std::cout << "Partition Success: " << success << std::endl;
+    } 
+    else 
+    {
+        std::cout << "There was an error calling METIS_PartMeshDual: " << success << std::endl;
+        switch (success)
+        {
+            case METIS_ERROR_INPUT:
+                std::cout << "METIS_ERROR_INPUT " << std::endl;
+                break;
+            case METIS_ERROR_MEMORY:
+                std::cout << "METIS_ERROR_MEMORY " << std::endl;
+                break;
+            default:
+                std::cout << "METIS_ERROR (Unkown) " << std::endl;
+                break;
+        }
+        return nullptr;
+    }
 
 
     // for(int i=0;i<16;i++)
