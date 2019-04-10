@@ -7,6 +7,8 @@
 #include <string>
 #include <algorithm>
 #include "omp.h"
+#include <set>
+#include <memory>
 
 using namespace std;
 
