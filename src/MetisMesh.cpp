@@ -19,9 +19,13 @@ int* MetisMesh::getNElements_()
 {
   return nElements_;
 }
-int** MetisMesh::getLocal2GlobalNodes_()
+int** MetisMesh::getlocal2GlobalNodes_()
 {
   return local2GlobalNodes_;
+}
+int** MetisMesh::getlocal2GlobalElements_()
+{
+  return local2GlobalElements_;
 }
 std::vector<int>* MetisMesh::getGlobal2LocalNodes_()
 {
@@ -75,9 +79,9 @@ MetisMesh::MetisMesh()
     : nElements_(nullptr), nNodes_(nullptr), elementNbrNodes_(nullptr), elementType_(nullptr),
      local2GlobalElements_(nullptr),local2GlobalNodes_(nullptr),global2LocalNodes_(nullptr),
      node2Cells_(nullptr), cell2GlobalNodes_(nullptr), nTotalNode_(0), nBlock_(0),
-     x_(nullptr), y_(nullptr), z_(nullptr), connectivity_(nullptr), elementBlock_(nullptr), 
+     x_(nullptr), y_(nullptr), z_(nullptr), connectivity_(nullptr), elementBlock_(nullptr),
      localBoundary_()
-   
+
 
 
 {
@@ -436,13 +440,28 @@ void MetisMesh::ReadSingleBlockMesh(std::string fileName)
 
 
 
-void MetisMesh::WriteMesh(std::string fileName)
+void MetisMesh::WriteMesh(std::string fileName, ReconstructFaces* reconstruct_faces)
 {
 
     std::vector<string> filesName;
 
     for (int blockI = 0; blockI < nBlock_; blockI++)
     {
+      int connexion_count =0;
+      for(int connexionI=0;connexionI<reconstruct_faces->connexionVector_.size();connexionI++)
+      {
+        if ((reconstruct_faces->connexionVector_[connexionI][0]==blockI)||(reconstruct_faces->connexionVector_[connexionI][1]==blockI))
+        {
+          if(reconstruct_faces->commonFacesVector_[connexionI].size()!=0)
+          {
+            connexion_count +=1;
+
+          }
+        }
+
+      }
+
+
 
         // creer dynamiquement le nom des fichiers partition a partir de linput donne par le user
         std::string name = fileName + std::to_string(blockI) + ".su2"; // C++11 for std::to_string
@@ -456,8 +475,18 @@ void MetisMesh::WriteMesh(std::string fileName)
         int nElements = nElements_[blockI];
 
 
-        fprintf(fid, "Block= %d\n", blockI);
+        // fprintf(fid, "Block= %d\n", blockI);
         fprintf(fid, "NDIME= %d\n", nDimensions_);
+        fprintf(fid, "\n");
+
+        std::cout << "access connectivity elements block " << blockI << endl;
+        fprintf(fid, "NPOIN= %d\n", nNodes);
+        for (int nodeI = 0; nodeI < nNodes; nodeI++)
+        {
+            fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
+        }
+        fprintf(fid, "\n");
+
         fprintf(fid, "NELEM= %d\n", nElements);
 
         for (int elementI = 0; elementI < nElements; elementI++)
@@ -479,33 +508,44 @@ void MetisMesh::WriteMesh(std::string fileName)
             fprintf(fid, "\n");
         }
 
-        std::cout << "access connectivity elements block " << blockI << endl;
-        fprintf(fid, "NPOIN= %d\n", nNodes);
-        for (int nodeI = 0; nodeI < nNodes; nodeI++)
-        {
-            fprintf(fid, "%.12e %.12e %.12e\n", x_[blockI][nodeI], y_[blockI][nodeI], z_[blockI][nodeI]);
-        }
-    
 
 
-        
         // Ajoute des frontiere physique
         std::cout << " ----- Ajout des frontieres pour le block " << blockI << endl;
+        fprintf(fid, "\n");
 
-        fprintf(fid, "NMARK= %d\n", metisBoundary_->nBoundaries_);
+        int count_real_boundaries =0;
+
+        for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++)
+        {
+
+            int markerElems = (*localBoundary_)[make_pair(boundaryI, blockI)].size();
+
+            if(markerElems!=0)
+            {
+                count_real_boundaries +=1;
+            }
+        }
+
+
+
+        fprintf(fid, "NMARK= %d\n", count_real_boundaries+connexion_count);
         std::cout << "Nombre de frontieres = " << metisBoundary_->nBoundaries_ << endl;
 
-        for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++) {
+        for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++)
+        {
 
             int markerElems = (*localBoundary_)[make_pair(boundaryI, blockI)].size();
             std::cout << "markerElems " << markerElems << endl;
 
-            fprintf(fid, "MARKER_TAG= %s\n", metisBoundary_->boundaryNames_[boundaryI].c_str());
-            fprintf(fid, "MARKER_ELEMS= %d\n", markerElems);
+            if(markerElems!=0)
+            {
+              fprintf(fid, "MARKER_TAG= %s\n", metisBoundary_->boundaryNames_[boundaryI].c_str());
+              fprintf(fid, "MARKER_ELEMS= %d\n", markerElems);
 
             for (int elementI = 0; elementI < markerElems; elementI++) {
 
-                
+
                 int NELEM = (*localBoundary_)[make_pair(boundaryI, blockI)][elementI].size();
                 int su2Id;
 
@@ -524,10 +564,47 @@ void MetisMesh::WriteMesh(std::string fileName)
                    // std::cout << (*localBoundary_)[make_pair(boundaryI, blockI)][elementI][nodeI] << " ";
                 }
 
-                //std::cout << endl; 
+                //std::cout << endl;
                 fprintf(fid, "\n");
             }
-        
+          }
+
+        }
+
+        for(int connexionI=0;connexionI<reconstruct_faces->connexionVector_.size();connexionI++)
+        {
+          if ((reconstruct_faces->connexionVector_[connexionI][0]==blockI)||(reconstruct_faces->connexionVector_[connexionI][1]==blockI))
+          {
+            if(reconstruct_faces->commonFacesVector_[connexionI].size()!=0)
+            {
+              fprintf(fid, "MARKER_TAG= CONNEXION\n");
+              fprintf(fid, "MARKER_ELEMS= %d\n", reconstruct_faces->commonFacesVector_[connexionI].size());
+
+              for(int faceI=0;faceI<reconstruct_faces->commonFacesVector_[connexionI].size(); faceI++)
+              {
+                std::vector<int> global_face_2_nodes_connectivity = reconstruct_faces->commonFacesVector_[connexionI][faceI];
+                int face_type =0;
+                if(global_face_2_nodes_connectivity.size()==3)
+                {
+                  face_type = 5;
+                }
+                else if(global_face_2_nodes_connectivity.size()==4)
+                {
+                  face_type = 9;
+                }
+                fprintf(fid, "%d", face_type);
+                for(int nodeI =0 ; nodeI<global_face_2_nodes_connectivity.size();nodeI++)
+                {
+                  int global_node = global_face_2_nodes_connectivity[nodeI];
+                  int local_node = ReturnLocalNode(global_node, blockI, global2LocalNodes_);
+                  fprintf(fid, " %d", local_node);
+                }
+                fprintf(fid, "\n");
+              }
+            }
+          }
+
+
         }
 
         fclose(fid);
@@ -538,10 +615,6 @@ void MetisMesh::WriteMesh(std::string fileName)
     // store name in attribute so we can print them later in topology gile
     filesName_ = filesName;
 }
-
-
-
-
 
 int MetisMesh::NumberOfNodes(int elementType)
 {
@@ -649,6 +722,17 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     std::cout << "Partition Success: " << success << std::endl;
 
+
+    // for(int i=0;i<16;i++)
+    // {
+    //   epart[i] = 0;
+    //   epart[i+16] = 1;
+    //   epart[i+32] = 2;
+    //   epart[i+48] = 3;
+
+    // }
+
+
     std::vector<int> elementsPerBlock[nPart];
     std::vector<int> elementNbrNodesPerBlock[nPart];
 
@@ -660,6 +744,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
         elementBlock_[i] = epart[i];
         //std::cout << "element" << i << " = " << elementBlock_[i] << endl;
         int blockId = epart[i];
+
         elementsPerBlock[blockId].push_back(i);
         elementNbrNodesPerBlock[blockId].push_back(elementNbrNodes_[i]);
     }
@@ -698,6 +783,8 @@ MetisMesh* MetisMesh::Partition(int nPart)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
         newConnectivity[blockI] = new std::vector<int>[newNelements[blockI]];
+
+
         std::cout << "building newConnectivity " << blockI << endl;
         std::cout << newNelements[blockI] << endl;
 
@@ -716,6 +803,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
                 int n1 = connectivity_[0][elementIblockI][j];
                 int newN1 = findNodeIndex(addedNode[blockI], n1);
                 newConnectivity[blockI][i][j] = newN1-1;
+
             }
         }
 
@@ -742,6 +830,27 @@ MetisMesh* MetisMesh::Partition(int nPart)
     newMesh->SetConnectivity(newConnectivity);
 
     std::cout << "newMesh ok" << endl;
+    newMesh->node2Cells_ = new std::vector<int> *[nPart];
+
+    for (int blockI = 0; blockI < nPart; blockI++)
+    {
+      newMesh->node2Cells_[blockI] = new std::vector<int>[newMesh->nNodes_[blockI]];
+      for (int elementI = 0; elementI < newMesh->nElements_[blockI]; elementI++)
+      {
+        for(int nodeI=0; nodeI < newMesh->connectivity_[blockI][elementI].size();nodeI++)
+        {
+          int node = newMesh->connectivity_[blockI][elementI][nodeI];
+
+          newMesh->node2Cells_[blockI][node].push_back(elementI);
+        }
+      }
+
+    }
+
+
+
+
+
 
     newMesh->global2LocalElements_ = new std::vector<int>[nElements_[0]];
 
@@ -772,7 +881,6 @@ MetisMesh* MetisMesh::Partition(int nPart)
     /*=====================================*/
 
     std::cout << "local and global" << endl;
-    #pragma omp parallel for num_threads(4)
     for (int blockI = 0; blockI < nPart; blockI++)
     {
 
@@ -797,6 +905,9 @@ MetisMesh* MetisMesh::Partition(int nPart)
             /*=====================================*/
         }
     }
+
+
+
 
 
     std::cout << "addedNode ok" << endl;
@@ -852,7 +963,6 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
 {
    // vector <int>** globalNode2LocalNodes = this->getGlobal2LocalNodes_();
 
-    std::cout << "ALLLLOOO " << endl;
     //std::vector<int> **newBoundaryElementType;
     //newBoundaryElementType = new std::vector<int> *[nBlock_];
     std::vector<int> node1;
@@ -865,14 +975,14 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
 
         std::vector<int> face2Block;
         int boundaryElementNbr = metisBoundary->boundaryNelements_[boundaryI];
-        
+
         //newBoundaryElementType[boundaryI] = new std::vector<int> [boundaryElementNbr];
         // Map <BoundaryIndex, BlockNumber> to a vector<vector<int>>
-        
+
         // accede a chacun des faces de la frontiere
         for (int i = 0; i < boundaryElementNbr; i++)
         {
-            
+
             int sizeBoundary = metisBoundary->boundaryElementNbrNodes_[boundaryI][i];
             int firstNode = metisBoundary->boundaryConnectivity_[boundaryI][i][0];
             node1 = globalNode2GlobalCells[0][firstNode];
@@ -912,36 +1022,37 @@ void MetisMesh::ComputePhysicalBoundaries(MetisBoundary* metisBoundary, std::vec
                 }
                 //std::cout << "La face a la frontiere " << i << "appartient au block " << face2Block[i] << endl;
             }
-            
-          
+
+
             int localBlock = face2Block[i];
             vector<int> localBoundaryElement;
-         
+
             for (int k = 0; k < sizeBoundary; k++)
             {
-                
+
                 int globalNode = metisBoundary->boundaryConnectivity_[boundaryI][i][k];
-  
+
                 int localNode = ReturnLocalNode(globalNode, localBlock, global2LocalNodes);
                 localBoundaryElement.push_back(localNode);
-                
+
             }
-            
-            (*localBoundary)[make_pair(boundaryI, localBlock)].push_back(localBoundaryElement);    
+
+            (*localBoundary)[make_pair(boundaryI, localBlock)].push_back(localBoundaryElement);
         }
-  
+
     }
 
     // Allocate as attribute
     localBoundary_ = localBoundary;
 }
 
-int MetisMesh::ReturnLocalNode(int globalNode, int localBlock, std::vector<int>* global2LocalNodes) {
+int MetisMesh::ReturnLocalNode(int globalNode, int localBlock, std::vector<int>* global2LocalNodes)
+{
 
     int localNode = 0;
     int i = 1;
     int index = global2LocalNodes[globalNode][i];
-    
+
     while (index != localBlock) {
         i = i + 2;
         index = global2LocalNodes[globalNode][i];
@@ -974,6 +1085,16 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
 
         fprintf(fid, "Block= %d\n", blockI );
 
+        int n_ghost_cells=0;
+        for (int boundaryI = 0; boundaryI < metisBoundary_->nBoundaries_; boundaryI++)
+        {
+
+            n_ghost_cells += (*localBoundary_)[make_pair(boundaryI, blockI)].size();
+        }
+
+        n_ghost_cells+=nElements_[blockI];
+        fprintf(fid, "GhostCount= %d\n", n_ghost_cells );
+
         // Check how many connexions in block
         vector<int> connexions_in_block_idx;
 
@@ -981,7 +1102,10 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
         {
             if ((reconstruct_faces->connexionVector_[j][0]==blockI)||(reconstruct_faces->connexionVector_[j][1]==blockI))
             {
+              if(reconstruct_faces->commonFacesVector_[j].size()!=0)
+              {
                 connexions_in_block_idx.push_back(j);
+              }
             }
         }
 
@@ -1017,11 +1141,11 @@ void MetisMesh::WriteTopology(std::string fileName, ReconstructFaces* reconstruc
 
                 if (global2local_block_0==blockI)
                 {
-                    fprintf(fid, "%d\n", global2local_elem_0);
+                    fprintf(fid, "%d\n", global2local_elem_1);
                 }
                 else
                 {
-                    fprintf(fid, "%d\n", global2local_elem_1);
+                    fprintf(fid, "%d\n", global2local_elem_0);
                 }
             }
         }

@@ -1,0 +1,12 @@
+cartesian_5x5x5_1B
+1
+block# 1    nsubface 6
+   5    5    5
+	BC    is   ie   js   je   ks   ke icomp
+	FAR    1    5    1    1    1    5     1
+	FAR    1    5    5    5    1    5     0
+	FAR    1    1    1    5    1    5     0
+	FAR    5    5    1    5    1    5     0
+	WAL    1    5    1    5    1    1     0
+	FAR    1    5    1    5    5    5     0
+
