@@ -660,7 +660,9 @@ MetisMesh* MetisMesh::Partition(int nPart)
 
     // Vecteurs d'entrée pour Metis
     int eptr[nElements_[0] + 1];
-    int *eind = new int[nTotalNode_];
+
+    // Creer un pointeur intelligent 
+    unique_ptr<int[]> eind(new int[nTotalNode_]);
 
     // Converting connectivity into METIS data structure See Metis reference doc
     eptr[0] = 0;
@@ -692,7 +694,7 @@ MetisMesh* MetisMesh::Partition(int nPart)
     int epart[nElements_[0]];
     int npart[nNodes_[0]];
 
-    int success = METIS_PartMeshDual(&nElements_[0], &nNodes_[0], &eptr[0], eind, NULL, NULL,
+    int success = METIS_PartMeshDual(&nElements_[0], &nNodes_[0], &eptr[0], eind.get(), NULL, NULL,
                                      &ncommon, &nPart, NULL, NULL, &objval,
                                      &epart[0], &npart[0]);
 
@@ -924,9 +926,6 @@ MetisMesh* MetisMesh::Partition(int nPart)
         delete[] newConnectivity;
     newConnectivity = nullptr;
 
-    if (eind != nullptr)
-        delete[] eind;
-    eind = nullptr;
 
 
 
